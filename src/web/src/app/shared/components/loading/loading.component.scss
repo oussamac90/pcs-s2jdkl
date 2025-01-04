@@ -1,0 +1,96 @@
+// Import core design tokens and utilities
+@use 'assets/styles/variables' as *;
+@use 'assets/styles/mixins' as *;
+
+// Loading container with enhanced visibility for maritime environments
+.loading-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: $z-index-modal;
+  background-color: rgba($color-white, 0.92); // Higher opacity for better visibility
+  backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  
+  // Support for outdoor/bright light conditions
+  @include high-contrast-mode {
+    background-color: rgba($color-white, 0.98);
+    backdrop-filter: none;
+  }
+
+  // Optimize for reduced motion preferences
+  @include optimize-animation {
+    backdrop-filter: none;
+  }
+}
+
+// Maritime-optimized spinner sizing and visibility
+.loading-spinner {
+  width: spacing(8); // 64px base size
+  height: spacing(8);
+  margin-bottom: spacing(3);
+  color: $color-primary; // Maritime blue for brand consistency
+  
+  // Enhanced visibility in bright conditions
+  filter: drop-shadow(0 2px 4px rgba($color-black, 0.15));
+  
+  // Responsive sizing for different displays
+  @include respond-to('sm') {
+    width: spacing(10); // 80px
+    height: spacing(10);
+  }
+  
+  @include respond-to('lg') {
+    width: spacing(12); // 96px
+    height: spacing(12);
+  }
+  
+  // High contrast support for outdoor visibility
+  @include high-contrast-mode {
+    color: $color-black;
+    filter: none;
+  }
+  
+  // Optimize for reduced motion
+  @include optimize-animation;
+}
+
+// Loading text with enhanced readability
+.loading-text {
+  color: $color-secondary;
+  font-family: $font-family-primary;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  text-align: center;
+  margin-top: spacing(2);
+  
+  // Text shadow for better contrast in bright conditions
+  text-shadow: 0 1px 2px rgba($color-black, 0.1);
+  
+  // Larger text for control room displays
+  @include control-room-display {
+    font-size: $font-size-lg;
+  }
+  
+  // High contrast support
+  @include high-contrast-mode {
+    color: $color-black;
+    text-shadow: none;
+  }
+  
+  // Screen reader support
+  &.sr-only {
+    @include screen-reader-only;
+  }
+}
+
+// Hardware acceleration for smooth animations
+.loading-container,
+.loading-spinner {
+  @include hardware-accelerate;
+}
