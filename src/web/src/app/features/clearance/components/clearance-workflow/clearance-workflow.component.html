@@ -1,0 +1,120 @@
+<div class="clearance-workflow-container maritime-optimized" [attr.data-display-mode]="displayMode">
+  <!-- Workflow Header Section -->
+  <div class="workflow-header">
+    <h2 class="high-contrast-text" aria-label="Vessel Clearance Status Header">
+      Vessel Clearance Status
+      <div *ngIf="pendingItems > 0" 
+           class="alert-badge high-visibility" 
+           role="alert" 
+           aria-live="polite">
+        {{pendingItems}} Items Pending
+      </div>
+    </h2>
+  </div>
+
+  <!-- Vessel Information Section -->
+  <div class="vessel-details high-contrast" role="region" aria-label="Vessel Details">
+    <div class="info-row">
+      <span class="vessel-name">Vessel: {{vesselName}}</span>
+      <span class="imo-number">IMO: {{imoNumber}}</span>
+    </div>
+  </div>
+
+  <!-- Clearance Requirements List -->
+  <div class="clearance-list" role="list" aria-label="Clearance Requirements">
+    <ng-container *ngFor="let clearance of clearanceRequirements">
+      <div class="clearance-item" role="listitem">
+        <div class="item-details">
+          <div class="item-name">{{clearance.name}}</div>
+          <div class="item-status" [attr.aria-label]="'Status: ' + clearance.status">
+            <span class="status-badge" [ngClass]="'status-' + clearance.status">
+              {{clearance.status}}
+            </span>
+            <span class="timestamp">{{clearance.timestamp | date:'medium'}}</span>
+          </div>
+        </div>
+        
+        <div class="item-actions">
+          <button mat-button
+                  *ngIf="clearance.hasDocuments"
+                  (click)="reviewDocuments(clearance.id, clearance.documentType)"
+                  class="review-button"
+                  [attr.aria-label]="'Review documents for ' + clearance.name">
+            <mat-icon>description</mat-icon>
+            Review Documents
+          </button>
+          
+          <mat-checkbox *ngIf="clearance.status !== 'Locked'"
+                       [checked]="clearance.isComplete"
+                       (change)="updateClearanceStatus(clearance.id, $event.checked)"
+                       [attr.aria-label]="'Mark ' + clearance.name + ' as complete'">
+            Complete
+          </mat-checkbox>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Progress Tracking -->
+  <div class="workflow-progress" role="progressbar"
+       [attr.aria-valuenow]="completionPercentage"
+       [attr.aria-valuemin]="0"
+       [attr.aria-valuemax]="100">
+    <mat-progress-bar mode="determinate"
+                     [value]="completionPercentage"
+                     class="maritime-high-contrast">
+    </mat-progress-bar>
+    <span class="progress-label">{{completionPercentage}}% Complete</span>
+  </div>
+
+  <!-- Document Review Section -->
+  <div *ngIf="activeDocuments?.length" 
+       class="document-review" 
+       role="region" 
+       aria-label="Document Review">
+    <h3>Required Documents</h3>
+    <div class="document-list">
+      <div *ngFor="let doc of activeDocuments" 
+           class="document-item">
+        <mat-icon class="document-icon" 
+                 [attr.aria-label]="doc.type + ' document'">
+          {{doc.icon}}
+        </mat-icon>
+        <span class="document-name">{{doc.name}}</span>
+        <span class="document-status" 
+              [ngClass]="'status-' + doc.status">
+          {{doc.status}}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="clearance-actions">
+    <button mat-raised-button
+            class="primary"
+            (click)="refresh()"
+            [attr.aria-label]="'Refresh clearance status'"
+            accesskey="r">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+    
+    <button mat-raised-button
+            class="secondary"
+            (click)="emergencyHold.emit()"
+            [disabled]="!canEmitEmergencyHold"
+            [attr.aria-label]="'Trigger emergency hold'"
+            accesskey="e">
+      <mat-icon>warning</mat-icon>
+      Emergency Hold
+    </button>
+  </div>
+
+  <!-- Accessibility Skip Link -->
+  <a href="#main-content" 
+     class="skip-link" 
+     tabindex="0">
+    Skip to main content
+  </a>
+</div>
