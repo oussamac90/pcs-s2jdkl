@@ -1,0 +1,112 @@
+// Import core design tokens and mixins
+@use '../../../../assets/styles/variables' as *;
+@use '../../../../assets/styles/mixins' as *;
+
+.error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  width: 100%;
+  padding: spacing(4);
+  background-color: rgba($color-secondary, 0.05);
+  
+  // Responsive adjustments for smaller screens
+  @include respond-to('sm') {
+    min-height: 150px;
+    padding: spacing(2);
+  }
+
+  // Night mode optimization for maritime control rooms
+  @include control-room-display {
+    background-color: rgba($color-secondary, 0.15);
+    min-height: 300px;
+  }
+}
+
+.error-card {
+  max-width: 400px;
+  width: 100%;
+  padding: spacing(3);
+  margin: spacing(2);
+  border-radius: $border-radius-lg;
+  border-left: 4px solid $color-error;
+  background-color: $color-white;
+  box-shadow: $shadow-md;
+
+  // High contrast mode for outdoor visibility
+  @include high-contrast-mode {
+    border-width: 6px;
+    box-shadow: none;
+    border: 2px solid $color-black;
+  }
+
+  // Focus outline for accessibility
+  @include focus-visible;
+
+  // Hardware acceleration for smooth animations
+  @include hardware-accelerate;
+}
+
+.error-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: spacing(6);
+  height: spacing(6);
+  margin-bottom: spacing(2);
+  border-radius: 50%;
+  background-color: rgba($color-error, 0.1);
+  color: $color-error;
+
+  // Enhanced visibility for outdoor displays
+  @include high-contrast-mode {
+    background-color: $color-white;
+    border: 2px solid $color-error;
+  }
+
+  i {
+    font-size: $font-size-xl;
+  }
+}
+
+.error-message {
+  margin: spacing(2) 0;
+  font-family: $font-family-primary;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-medium;
+  color: $color-secondary;
+  line-height: 1.5;
+  text-align: center;
+
+  // Enhanced readability for outdoor conditions
+  @include high-contrast-mode {
+    color: $color-black;
+    font-weight: $font-weight-bold;
+  }
+
+  // Larger text for control room displays
+  @include control-room-display {
+    font-size: $font-size-xl;
+  }
+}
+
+.error-details {
+  margin-top: spacing(2);
+  font-size: $font-size-base;
+  color: $color-gray-600;
+  text-align: center;
+
+  // Night mode optimization
+  @include control-room-display {
+    color: $color-gray-500;
+  }
+
+  // Enhanced contrast for outdoor visibility
+  @include high-contrast-mode {
+    color: $color-gray-900;
+  }
+}
+
+// Optimize animations for reduced motion preferences
+@include optimize-animation;
