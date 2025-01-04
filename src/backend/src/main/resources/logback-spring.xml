@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Logback Configuration for Vessel Call Management System -->
+<!-- External Dependencies: -->
+<!-- logback-classic: ch.qos.logback:1.4.x -->
+<!-- logstash-logback-encoder: net.logstash.logback:7.3 -->
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <!-- Properties -->
+    <springProperty scope="context" name="appName" source="spring.application.name"/>
+    <springProperty scope="context" name="activeProfile" source="spring.profiles.active"/>
+    
+    <!-- Environment Variables with Defaults -->
+    <property name="LOG_PATH" value="${LOG_PATH:-logs}"/>
+    <property name="LOG_LEVEL" value="${LOG_LEVEL:-INFO}"/>
+    <property name="LOGSTASH_HOST" value="${LOGSTASH_HOST:-localhost}"/>
+    <property name="LOGSTASH_PORT" value="${LOGSTASH_PORT:-5000}"/>
+    <property name="AUDIT_LOG_PATH" value="${AUDIT_LOG_PATH:-logs/audit}"/>
+    <property name="SECURITY_LOG_LEVEL" value="${SECURITY_LOG_LEVEL:-INFO}"/>
+    <property name="MAX_FILE_SIZE" value="${MAX_FILE_SIZE:-100MB}"/>
+    <property name="MAX_HISTORY" value="${MAX_HISTORY:-30}"/>
+    <property name="TOTAL_SIZE_CAP" value="${TOTAL_SIZE_CAP:-3GB}"/>
+
+    <!-- Console Appender -->
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] [%X{correlationId}] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- File Appender -->
+    <appender name="File" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/vcms.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{correlationId}] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/archived/vcms.%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+            <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${TOTAL_SIZE_CAP}</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Audit File Appender -->
+    <appender name="AuditFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${AUDIT_LOG_PATH}/audit.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{correlationId}] [%X{userId}] [%X{clientIp}] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${AUDIT_LOG_PATH}/archived/audit.%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>90</maxHistory>
+            <totalSizeCap>5GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Logstash Appender -->
+    <appender name="Logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>${LOGSTASH_HOST}:${LOGSTASH_PORT}</destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"application":"vcms","environment":"${activeProfile}","version":"${application.version}"}</customFields>
+            <includeMdcKeyName>correlationId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+            <includeMdcKeyName>clientIp</includeMdcKeyName>
+        </encoder>
+        <keepAliveDuration>5 minutes</keepAliveDuration>
+    </appender>
+
+    <!-- Environment Specific Configurations -->
+    <springProfile name="dev">
+        <root level="DEBUG">
+            <appender-ref ref="Console"/>
+            <appender-ref ref="File"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="staging">
+        <root level="INFO">
+            <appender-ref ref="Console"/>
+            <appender-ref ref="File"/>
+            <appender-ref ref="Logstash"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <root level="WARN">
+            <appender-ref ref="File"/>
+            <appender-ref ref="Logstash"/>
+        </root>
+    </springProfile>
+
+    <!-- Logger Configurations -->
+    <logger name="com.pcs.vcms" level="${LOG_LEVEL}" additivity="false">
+        <appender-ref ref="Console"/>
+        <appender-ref ref="File"/>
+        <appender-ref ref="Logstash"/>
+    </logger>
+
+    <logger name="com.pcs.vcms.security.audit" level="${SECURITY_LOG_LEVEL}" additivity="false">
+        <appender-ref ref="AuditFile"/>
+        <appender-ref ref="Logstash"/>
+    </logger>
+
+    <logger name="org.springframework.security" level="INFO" additivity="false">
+        <appender-ref ref="File"/>
+        <appender-ref ref="Logstash"/>
+    </logger>
+
+    <logger name="org.springframework" level="INFO" additivity="false">
+        <appender-ref ref="File"/>
+        <appender-ref ref="Logstash"/>
+    </logger>
+
+    <logger name="org.hibernate" level="WARN" additivity="false">
+        <appender-ref ref="File"/>
+        <appender-ref ref="Logstash"/>
+    </logger>
+
+</configuration>
