@@ -1,0 +1,32 @@
+# Unless a later match takes precedence, @project-leads will be requested for review
+* @project-leads
+
+# Backend application components
+/src/backend/ @backend-team
+
+# Frontend application components 
+/src/web/ @frontend-team
+
+# Security-sensitive components require dual-team review
+/src/backend/src/main/java/com/pcs/vcms/security/ @security-team @backend-team
+
+# Infrastructure and cloud configurations
+/infrastructure/ @devops-team
+
+# CI/CD workflow configurations
+/.github/workflows/ @devops-team
+
+# Database migrations require both teams
+/src/backend/src/main/resources/db/migration/ @database-team @backend-team
+
+# Kubernetes configurations require platform team review
+/infrastructure/kubernetes/ @devops-team @platform-team
+
+# Monitoring configurations require SRE review
+/infrastructure/monitoring/ @devops-team @sre-team
+
+# Frontend dependency management
+package.json @frontend-team
+
+# Backend build configuration
+build.gradle @backend-team
