@@ -1,0 +1,238 @@
+// =============================================================================
+// VESSEL CALL MANAGEMENT SYSTEM - HEADER COMPONENT
+// Version: 1.0.0
+// =============================================================================
+
+// Import core styles
+@use 'src/web/src/assets/styles/variables' as *;
+@use 'src/web/src/assets/styles/mixins' as *;
+
+// -----------------------------------------------------------------------------
+// Header Container
+// -----------------------------------------------------------------------------
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: spacing(8);
+  padding: 0 spacing(2);
+  background-color: $color-primary;
+  color: $color-white;
+  position: relative;
+  z-index: $z-index-fixed;
+  box-shadow: $shadow-md;
+
+  // Control room display optimizations
+  @include control-room-display {
+    height: spacing(10);
+    padding: 0 spacing(3);
+  }
+
+  // High contrast mode adjustments
+  @include high-contrast-mode {
+    border-bottom: 2px solid $color-black;
+    box-shadow: none;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Branding Section
+// -----------------------------------------------------------------------------
+
+.branding {
+  display: flex;
+  align-items: center;
+  gap: spacing(2);
+  min-width: 200px;
+
+  &__logo {
+    height: spacing(4);
+    width: auto;
+
+    @include control-room-display {
+      height: spacing(5);
+    }
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-medium;
+    color: $color-white;
+    
+    // Hide on mobile
+    @media screen and (max-width: $breakpoint-sm) {
+      @include screen-reader-only;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Search Container
+// -----------------------------------------------------------------------------
+
+.search-container {
+  flex: 1;
+  max-width: 500px;
+  margin: 0 spacing(3);
+  position: relative;
+
+  @media screen and (max-width: $breakpoint-md) {
+    display: none;
+  }
+
+  &__input {
+    width: 100%;
+    height: spacing(5);
+    padding: 0 spacing(5) 0 spacing(2);
+    border-radius: $border-radius-md;
+    border: 1px solid rgba($color-white, 0.2);
+    background-color: rgba($color-white, 0.1);
+    color: $color-white;
+    font-size: $font-size-md;
+
+    &::placeholder {
+      color: rgba($color-white, 0.7);
+    }
+
+    @include focus-visible;
+
+    @include control-room-display {
+      height: spacing(6);
+      font-size: $font-size-lg;
+    }
+  }
+
+  &__icon {
+    position: absolute;
+    right: spacing(2);
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba($color-white, 0.7);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Actions Section
+// -----------------------------------------------------------------------------
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: spacing(2);
+
+  &__button {
+    display: flex;
+    align-items: center;
+    padding: spacing(1) spacing(2);
+    border-radius: $border-radius-md;
+    background: rgba($color-white, 0.1);
+    color: $color-white;
+    transition: $transition-base;
+
+    &:hover {
+      background: rgba($color-white, 0.2);
+    }
+
+    @include focus-visible;
+
+    // Enhanced touch targets for mobile
+    @media screen and (max-width: $breakpoint-sm) {
+      padding: spacing(1.5) spacing(2);
+    }
+
+    // Control room optimizations
+    @include control-room-display {
+      padding: spacing(1.5) spacing(3);
+    }
+  }
+
+  &__icon {
+    margin-right: spacing(1);
+    font-size: $font-size-lg;
+
+    @include control-room-display {
+      font-size: $font-size-xl;
+    }
+  }
+
+  &__badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: spacing(2.5);
+    height: spacing(2.5);
+    padding: 0 spacing(0.75);
+    border-radius: $border-radius-lg;
+    background-color: $color-accent;
+    color: $color-white;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+
+    @include control-room-display {
+      min-width: spacing(3);
+      height: spacing(3);
+      font-size: $font-size-md;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Maritime Status Section
+// -----------------------------------------------------------------------------
+
+.maritime-status {
+  display: flex;
+  align-items: center;
+  padding: spacing(1) spacing(2);
+  background: rgba($color-white, 0.1);
+  border-radius: $border-radius-md;
+  margin-left: spacing(2);
+
+  @media screen and (max-width: $breakpoint-md) {
+    display: none;
+  }
+
+  &__indicator {
+    width: spacing(1);
+    height: spacing(1);
+    border-radius: 50%;
+    margin-right: spacing(1);
+
+    &--active {
+      background-color: $color-success;
+      animation: pulse 2s infinite;
+
+      @include optimize-animation;
+    }
+  }
+
+  &__text {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-white;
+
+    @include control-room-display {
+      font-size: $font-size-md;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Animations
+// -----------------------------------------------------------------------------
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
