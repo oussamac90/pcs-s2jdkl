@@ -1,0 +1,262 @@
+// Import core design tokens and mixins
+@use 'src/web/src/assets/styles/_variables' as *;
+@use 'src/web/src/assets/styles/_mixins' as *;
+
+// Main form container
+.vessel-call-form {
+  display: flex;
+  flex-direction: column;
+  padding: spacing(3);
+  background-color: $color-white;
+  min-height: 100vh;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-shadow: $shadow-md;
+
+  @include respond-to('sm') {
+    padding: spacing(4);
+    border-radius: $border-radius-lg;
+  }
+
+  @include respond-to('md') {
+    padding: spacing(5);
+  }
+
+  @include high-contrast-mode {
+    border: 2px solid $color-black;
+    box-shadow: none;
+  }
+}
+
+// Form sections with clear visual hierarchy
+.form-section {
+  margin-bottom: spacing(4);
+  border-bottom: 2px solid $color-gray-200;
+  padding-bottom: spacing(3);
+  background-color: rgba($color-white, 0.95);
+  border-radius: $border-radius-md;
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  h2 {
+    color: $color-gray-900;
+    font-size: $font-size-lg;
+    margin-bottom: spacing(3);
+    font-weight: $font-weight-medium;
+  }
+}
+
+// Form row layout with responsive design
+.form-row {
+  display: flex;
+  gap: spacing(3);
+  margin-bottom: spacing(2.5);
+  align-items: flex-start;
+  flex-wrap: wrap;
+
+  @include respond-to('sm') {
+    flex-wrap: nowrap;
+  }
+
+  @include respond-to('md') {
+    gap: spacing(4);
+  }
+}
+
+// Individual form field styling
+.form-field {
+  flex: 1;
+  min-width: 280px;
+  position: relative;
+  margin-bottom: spacing(2);
+
+  label {
+    display: block;
+    margin-bottom: spacing(1);
+    color: $color-gray-800;
+    font-weight: $font-weight-medium;
+    
+    &.required::after {
+      content: '*';
+      color: $color-error;
+      margin-left: spacing(0.5);
+    }
+  }
+
+  input, select {
+    width: 100%;
+    padding: spacing(1.5);
+    border: 1px solid $color-gray-300;
+    border-radius: $border-radius-md;
+    font-size: $font-size-base;
+    transition: $transition-base;
+
+    &:hover {
+      border-color: $color-gray-400;
+    }
+
+    &:focus {
+      border-color: $color-primary;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    }
+
+    @include high-contrast-mode {
+      border-width: 2px;
+      &:focus {
+        border-color: $color-black;
+        box-shadow: none;
+      }
+    }
+  }
+
+  .error-message {
+    color: $color-error;
+    font-size: $font-size-sm;
+    margin-top: spacing(1);
+    min-height: spacing(3);
+  }
+}
+
+// Document upload section styling
+.document-upload {
+  margin-top: spacing(3);
+  padding: spacing(3);
+  border: 2px dashed $color-gray-400;
+  border-radius: $border-radius-md;
+  background-color: $color-gray-100;
+  transition: all 0.3s ease;
+
+  &.drag-active {
+    border-color: $color-primary;
+    background-color: rgba($color-primary, 0.05);
+  }
+
+  .upload-prompt {
+    text-align: center;
+    color: $color-gray-700;
+    
+    .icon {
+      font-size: $font-size-xl;
+      color: $color-gray-500;
+      margin-bottom: spacing(2);
+    }
+  }
+
+  .file-list {
+    margin-top: spacing(3);
+    
+    .file-item {
+      display: flex;
+      align-items: center;
+      padding: spacing(1.5);
+      background-color: $color-white;
+      border-radius: $border-radius-sm;
+      margin-bottom: spacing(1);
+
+      .file-name {
+        flex: 1;
+        margin-right: spacing(2);
+      }
+
+      .remove-button {
+        color: $color-error;
+        cursor: pointer;
+        padding: spacing(1);
+        
+        &:hover {
+          color: darken($color-error, 10%);
+        }
+      }
+    }
+  }
+}
+
+// Action buttons styling
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: spacing(2);
+  margin-top: spacing(4);
+  padding-top: spacing(3);
+  border-top: 1px solid $color-gray-200;
+
+  button {
+    min-width: 120px;
+    padding: spacing(1.5) spacing(3);
+    border-radius: $border-radius-md;
+    font-weight: $font-weight-medium;
+    transition: $transition-base;
+
+    &.cancel {
+      background-color: $color-gray-100;
+      color: $color-gray-800;
+      
+      &:hover {
+        background-color: $color-gray-200;
+      }
+    }
+
+    &.submit {
+      background-color: $color-primary;
+      color: $color-white;
+      
+      &:hover {
+        background-color: darken($color-primary, 5%);
+      }
+
+      &:disabled {
+        background-color: $color-gray-400;
+        cursor: not-allowed;
+      }
+    }
+
+    @include high-contrast-mode {
+      border: 2px solid currentColor;
+    }
+  }
+
+  @include respond-to('sm') {
+    button {
+      min-width: 150px;
+    }
+  }
+}
+
+// Accessibility enhancements
+@include high-contrast-mode {
+  input:focus,
+  select:focus,
+  button:focus {
+    outline: 2px solid $color-black;
+    outline-offset: 2px;
+  }
+}
+
+// Touch target optimization for mobile
+@include respond-to('xs') {
+  button,
+  input,
+  select {
+    min-height: spacing(6);
+  }
+}
+
+// Control room display optimizations
+@include control-room-display {
+  .vessel-call-form {
+    max-width: 1400px;
+    font-size: $font-size-lg;
+  }
+
+  .form-field {
+    input,
+    select {
+      padding: spacing(2);
+      font-size: $font-size-lg;
+    }
+  }
+}
