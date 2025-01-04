@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Vessel Call Management System Logo">
+    <!-- Optimized with SVGO -->
+    <style>
+        .logo-primary { fill: #1976D2; }
+        .logo-secondary { fill: #424242; }
+        @media (prefers-color-scheme: dark) {
+            .logo-primary, .logo-secondary { fill: #FFFFFF; }
+        }
+    </style>
+    
+    <!-- Ship Hull -->
+    <path class="logo-primary" d="M40 40 L80 40 L90 30 L30 30 L40 40Z"/>
+    
+    <!-- Ship Body -->
+    <path class="logo-primary" d="M35 30 L85 30 L80 15 L40 15 L35 30Z"/>
+    
+    <!-- Bridge/Control Tower -->
+    <path class="logo-secondary" d="M50 15 L70 15 L70 5 L50 5 L50 15Z"/>
+    
+    <!-- Water Waves -->
+    <path class="logo-primary" d="M20 45 Q30 40 40 45 Q50 50 60 45 Q70 40 80 45 Q90 50 100 45" fill="none" stroke-width="2" stroke="currentColor"/>
+    
+    <!-- Text VCMS -->
+    <text class="logo-secondary" x="110" y="35" font-family="Arial, sans-serif" font-size="24" font-weight="bold">
+        VCMS
+    </text>
+    
+    <!-- Tagline -->
+    <text class="logo-secondary" x="110" y="50" font-family="Arial, sans-serif" font-size="12">
+        Vessel Call Management System
+    </text>
+    
+    <!-- Decorative Elements -->
+    <circle class="logo-primary" cx="30" cy="20" r="2"/>
+    <circle class="logo-primary" cx="35" cy="20" r="2"/>
+    
+    <!-- Focus/Interactive States -->
+    <rect width="240" height="60" fill="transparent" stroke="transparent">
+        <title>Vessel Call Management System Logo</title>
+    </rect>
+</svg>
