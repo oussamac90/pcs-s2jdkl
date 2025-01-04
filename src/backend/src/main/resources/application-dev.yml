@@ -1,0 +1,143 @@
+# Development Environment Configuration for Vessel Call Management System
+# Version: 1.0
+# Dependencies:
+# - Spring Boot: 3.1.x
+# - PostgreSQL: 14.x
+# - Redis: 6.x
+# - RabbitMQ: 3.x
+
+spring:
+  profiles: dev
+  
+  # Database Configuration
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/vcms_dev}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+
+  # JPA Configuration
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+      format_sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: vcms_dev
+
+  # Redis Configuration
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    ssl: false
+    timeout: 2000
+    database: 0
+
+  # RabbitMQ Configuration
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: /
+    ssl:
+      enabled: false
+    listener:
+      simple:
+        concurrency: 1
+        max-concurrency: 5
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+          multiplier: 2.0
+
+  # Security Configuration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:9000}
+          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:9000/.well-known/jwks.json}
+
+# Server Configuration
+server:
+  port: 8080
+  error:
+    include-stacktrace: always
+    include-message: always
+  tomcat:
+    max-threads: 50
+    min-spare-threads: 20
+    max-connections: 1000
+    accept-count: 100
+  ssl:
+    enabled: false
+
+# Management & Monitoring Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ['*']
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      show-components: true
+      probes:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      environment: development
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.pcs.vcms: DEBUG
+    org.springframework: INFO
+    org.hibernate: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/application-dev.log
+    max-size: 100MB
+    max-history: 30
+
+# Application Specific Configuration
+app:
+  cors:
+    allowed-origins: 
+      - "http://localhost:4200"
+    allowed-methods: ["*"]
+    allowed-headers: ["*"]
+    allow-credentials: true
+    max-age: 3600
+  
+  websocket:
+    endpoint: /ws
+    allowed-origins: 
+      - "http://localhost:4200"
+  
+  cache:
+    ttl: 300
+    vessel-calls: 300
+    berth-allocations: 300
+  
+  security:
+    allowed-ips: ["*"]
+    rate-limit:
+      enabled: false
