@@ -1,0 +1,170 @@
+// =============================================================================
+// VESSEL CALL MANAGEMENT SYSTEM - CORE VARIABLES
+// Version: 1.0.0
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// Typography System
+// -----------------------------------------------------------------------------
+
+// Font Families
+$font-family-primary: "Roboto", sans-serif;
+$font-family-secondary: "Open Sans", sans-serif;
+
+// Base Font Settings
+$font-size-base: 16px;
+$line-height-base: 1.5;
+
+// Font Scale (1.25 ratio)
+$font-size-xs: $font-size-base * 0.64;    // 10px
+$font-size-sm: $font-size-base * 0.8;     // 13px
+$font-size-md: $font-size-base;           // 16px
+$font-size-lg: $font-size-base * 1.25;    // 20px
+$font-size-xl: $font-size-base * 1.563;   // 25px
+$font-size-xxl: $font-size-base * 1.953;  // 31px
+$font-size-xxxl: $font-size-base * 2.441; // 39px
+
+// Font Weights
+$font-weight-light: 300;
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-bold: 700;
+
+// -----------------------------------------------------------------------------
+// Color System
+// -----------------------------------------------------------------------------
+
+// Brand Colors
+$color-primary: #1976D2;    // Maritime Blue
+$color-secondary: #424242;  // Neutral Gray
+$color-accent: #FF4081;     // Accent Pink
+
+// Vessel Status Colors
+$status-colors: (
+  planned: #FFA000,    // Amber
+  arrived: #1E88E5,    // Blue
+  at_berth: #43A047,   // Green
+  departed: #757575,   // Gray
+  cancelled: #E53935   // Red
+);
+
+// Neutral Colors
+$color-white: #FFFFFF;
+$color-black: #000000;
+$color-gray-100: #F5F5F5;
+$color-gray-200: #EEEEEE;
+$color-gray-300: #E0E0E0;
+$color-gray-400: #BDBDBD;
+$color-gray-500: #9E9E9E;
+$color-gray-600: #757575;
+$color-gray-700: #616161;
+$color-gray-800: #424242;
+$color-gray-900: #212121;
+
+// Semantic Colors
+$color-success: map-get($status-colors, 'at_berth');
+$color-warning: map-get($status-colors, 'planned');
+$color-error: map-get($status-colors, 'cancelled');
+$color-info: map-get($status-colors, 'arrived');
+
+// -----------------------------------------------------------------------------
+// Layout System
+// -----------------------------------------------------------------------------
+
+// Grid System
+$grid-columns: 12;
+$grid-gutter-width: 24px;
+
+// Base Spacing Unit (8px)
+$spacing-unit: 8px;
+
+// Spacing Scale
+$spacing-xxxs: $spacing-unit * 0.25;  // 2px
+$spacing-xxs: $spacing-unit * 0.5;    // 4px
+$spacing-xs: $spacing-unit;           // 8px
+$spacing-sm: $spacing-unit * 2;       // 16px
+$spacing-md: $spacing-unit * 3;       // 24px
+$spacing-lg: $spacing-unit * 4;       // 32px
+$spacing-xl: $spacing-unit * 5;       // 40px
+$spacing-xxl: $spacing-unit * 6;      // 48px
+$spacing-xxxl: $spacing-unit * 8;     // 64px
+
+// Container Max Widths
+$container-max-widths: (
+  sm: 540px,
+  md: 720px,
+  lg: 960px,
+  xl: 1140px
+);
+
+// -----------------------------------------------------------------------------
+// Breakpoints System
+// -----------------------------------------------------------------------------
+
+// Breakpoint Values
+$breakpoint-xs: 0;
+$breakpoint-sm: 600px;
+$breakpoint-md: 960px;
+$breakpoint-lg: 1280px;
+$breakpoint-xl: 1920px;
+
+// Breakpoint Map
+$breakpoints: (
+  xs: $breakpoint-xs,
+  sm: $breakpoint-sm,
+  md: $breakpoint-md,
+  lg: $breakpoint-lg,
+  xl: $breakpoint-xl
+);
+
+// -----------------------------------------------------------------------------
+// Z-Index System
+// -----------------------------------------------------------------------------
+
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+
+// -----------------------------------------------------------------------------
+// Border System
+// -----------------------------------------------------------------------------
+
+$border-radius-sm: 2px;
+$border-radius-md: 4px;
+$border-radius-lg: 8px;
+$border-width: 1px;
+$border-color: $color-gray-300;
+
+// -----------------------------------------------------------------------------
+// Shadow System
+// -----------------------------------------------------------------------------
+
+$shadow-sm: 0 1px 3px rgba($color-black, 0.12);
+$shadow-md: 0 4px 6px rgba($color-black, 0.15);
+$shadow-lg: 0 10px 15px rgba($color-black, 0.20);
+
+// -----------------------------------------------------------------------------
+// Transition System
+// -----------------------------------------------------------------------------
+
+$transition-base: all 0.2s ease-in-out;
+$transition-fade: opacity 0.15s linear;
+$transition-collapse: height 0.35s ease;
+
+// -----------------------------------------------------------------------------
+// Functions
+// -----------------------------------------------------------------------------
+
+@function spacing($multiplier) {
+  @if type-of($multiplier) != "number" {
+    @error "spacing() expects a number as parameter.";
+  }
+  @if $multiplier < 0 {
+    @error "spacing() expects a positive number as parameter.";
+  }
+  @return $spacing-unit * $multiplier;
+}
