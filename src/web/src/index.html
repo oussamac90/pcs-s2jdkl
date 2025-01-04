@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
+  <meta name="description" content="Vessel Call Management System - Comprehensive Port Community System for maritime operations">
+  <meta name="theme-color" content="#1976D2">
+  <meta name="color-scheme" content="light dark">
+  <meta name="application-name" content="VCMS">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="msapplication-TileColor" content="#1976D2">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com">
+
+  <title>Vessel Call Management System</title>
+  <base href="/">
+
+  <!-- Favicon and PWA icons -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png">
+
+  <!-- Font preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Typography and Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+  <!-- Accessibility and Screen Reader Support -->
+  <link rel="alternate" type="application/json" href="manifest.webmanifest">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+
+  <!-- Maritime Display Optimization -->
+  <meta name="screen-orientation" content="any">
+  <meta name="full-screen" content="yes">
+  <meta name="nightmode" content="enable">
+
+  <!-- SEO and Social Media -->
+  <meta name="keywords" content="vessel management, port operations, maritime, berth planning">
+  <meta property="og:title" content="Vessel Call Management System">
+  <meta property="og:description" content="Comprehensive Port Community System for maritime operations">
+  <meta property="og:type" content="website">
+
+  <!-- High Contrast and Color Modes -->
+  <script>
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark-theme');
+    }
+    if (window.matchMedia('(prefers-contrast: high)').matches) {
+      document.documentElement.classList.add('high-contrast');
+    }
+  </script>
+</head>
+<body class="mat-typography">
+  <app-root>
+    <!-- Accessible loading indicator -->
+    <div role="status" aria-live="polite" class="app-loading">
+      <div class="loading-spinner" aria-hidden="true"></div>
+      <p class="loading-text">Loading Vessel Call Management System...</p>
+    </div>
+  </app-root>
+
+  <!-- No JavaScript fallback -->
+  <noscript>
+    <div class="noscript-container">
+      <h1>JavaScript Required</h1>
+      <p>Please enable JavaScript to run the Vessel Call Management System. This application requires JavaScript for essential functionality.</p>
+    </div>
+  </noscript>
+
+  <!-- Error boundary for critical errors -->
+  <div id="error-boundary" aria-hidden="true" style="display: none;">
+    <div class="error-container" role="alert">
+      <h2>System Error</h2>
+      <p>An unexpected error has occurred. Please refresh the page or contact support.</p>
+    </div>
+  </div>
+</body>
+</html>
