@@ -1,0 +1,195 @@
+// Import core design tokens and utilities
+@use '../assets/styles/_variables' as *;
+@use '../assets/styles/_mixins' as *;
+
+// Global styles
+html {
+  box-sizing: border-box;
+  font-size: 16px;
+  
+  @include respond-to('lg') {
+    font-size: 18px;
+  }
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  font-family: $font-family-primary;
+  background-color: $color-background;
+  color-scheme: light dark;
+}
+
+// Root application container
+.app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: $color-background;
+  transition: background-color 0.3s ease;
+
+  @include optimize-animation;
+}
+
+// Header component
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: spacing(8); // 64px
+  z-index: $z-index-fixed;
+  background-color: $color-primary;
+  box-shadow: $shadow-md;
+  display: flex;
+  align-items: center;
+  padding: 0 spacing(2);
+  color: $color-white;
+
+  @include high-contrast-mode {
+    border-bottom: 2px solid $color-black;
+    box-shadow: none;
+  }
+
+  @include respond-to('xs') {
+    padding: 0 spacing(1);
+  }
+
+  @include control-room-display {
+    height: spacing(10);
+  }
+}
+
+// Main content layout
+.main-content {
+  display: flex;
+  flex: 1;
+  margin-top: spacing(8); // Match header height
+  position: relative;
+  overflow: hidden;
+
+  @include control-room-display {
+    margin-top: spacing(10);
+  }
+}
+
+// Side navigation
+.side-nav {
+  width: spacing(31.25); // 250px
+  background-color: $color-secondary;
+  padding: spacing(2) 0;
+  transition: width 0.3s ease;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  @include optimize-animation;
+  
+  @include respond-to('xs') {
+    position: fixed;
+    left: 0;
+    top: spacing(8);
+    bottom: 0;
+    transform: translateX(-100%);
+    z-index: $z-index-fixed - 1;
+    
+    &.open {
+      transform: translateX(0);
+    }
+  }
+
+  @include high-contrast-mode {
+    border-right: 2px solid $color-black;
+  }
+
+  @include control-room-display {
+    width: spacing(37.5); // 300px
+    top: spacing(10);
+  }
+}
+
+// Main content wrapper
+.content-wrapper {
+  flex: 1;
+  padding: spacing(2);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background-color: $color-background;
+
+  @include respond-to('md') {
+    padding: spacing(3);
+  }
+
+  @include respond-to('lg') {
+    padding: spacing(4);
+  }
+
+  @include control-room-display {
+    padding: spacing(5);
+  }
+}
+
+// Footer component
+.app-footer {
+  height: spacing(6); // 48px
+  background-color: $color-secondary;
+  color: $color-white;
+  display: flex;
+  align-items: center;
+  padding: 0 spacing(2);
+  font-size: $font-size-sm;
+
+  @include high-contrast-mode {
+    border-top: 2px solid $color-black;
+  }
+
+  @include respond-to('xs') {
+    padding: 0 spacing(1);
+  }
+
+  @include control-room-display {
+    height: spacing(8);
+    font-size: $font-size-md;
+  }
+}
+
+// Print styles
+@media print {
+  .app-header,
+  .side-nav,
+  .app-footer {
+    display: none;
+  }
+
+  .main-content {
+    margin-top: 0;
+  }
+
+  .content-wrapper {
+    padding: 0;
+  }
+}
+
+// High contrast mode enhancements
+@include high-contrast-mode {
+  .app-root {
+    background-color: $color-white;
+  }
+
+  .content-wrapper {
+    background-color: $color-white;
+  }
+}
+
+// Reduced motion preferences
+@media (prefers-reduced-motion: reduce) {
+  .app-root,
+  .side-nav {
+    transition: none;
+  }
+}
