@@ -1,0 +1,215 @@
+// =============================================================================
+// VESSEL CALL MANAGEMENT SYSTEM - CORE MIXINS
+// Version: 1.0.0
+// =============================================================================
+
+// Import core variables
+@use 'variables' as *;
+
+// -----------------------------------------------------------------------------
+// Responsive Design Mixins
+// -----------------------------------------------------------------------------
+
+@mixin respond-to($breakpoint, $orientation: null) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    $value: map-get($breakpoints, $breakpoint);
+    
+    @if $orientation {
+      @media screen and (min-width: $value) and (orientation: $orientation) {
+        @content;
+      }
+    } @else {
+      @media screen and (min-width: $value) {
+        @content;
+      }
+    }
+  } @else {
+    @error "Invalid breakpoint: #{$breakpoint}";
+  }
+}
+
+@mixin hide-on($breakpoint) {
+  @include respond-to($breakpoint) {
+    display: none !important;
+  }
+}
+
+@mixin control-room-display {
+  @media screen and (min-width: $breakpoint-xl) and (min-height: 1080px) {
+    font-size: $font-size-lg;
+    line-height: 1.6;
+    @content;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Maritime Layout Mixins
+// -----------------------------------------------------------------------------
+
+@mixin vessel-timeline-grid($columns: 24, $time-scale: 'hourly') {
+  display: grid;
+  grid-template-columns: repeat($columns, 1fr);
+  gap: spacing(1);
+  
+  @if $time-scale == 'hourly' {
+    min-width: spacing(120);
+    
+    @include respond-to('lg') {
+      min-width: spacing(180);
+    }
+  } @else if $time-scale == 'daily' {
+    min-width: spacing(90);
+    
+    @include respond-to('lg') {
+      min-width: spacing(150);
+    }
+  }
+  
+  // Enhanced touch targets for mobile
+  @include respond-to('xs') {
+    gap: spacing(2);
+  }
+  
+  // High contrast borders for outdoor visibility
+  border: $border-width solid rgba($color-gray-900, 0.2);
+  
+  @media (prefers-contrast: high) {
+    border-color: $color-black;
+  }
+}
+
+@mixin berth-allocation-layout {
+  display: grid;
+  grid-template-columns: [berth] 150px [timeline] 1fr;
+  gap: spacing(2);
+  
+  @include respond-to('md') {
+    grid-template-columns: [berth] 200px [timeline] 1fr;
+  }
+  
+  @include respond-to('lg') {
+    grid-template-columns: [berth] 250px [timeline] 1fr;
+  }
+}
+
+@mixin status-indicator($status) {
+  $status-color: map-get($status-colors, $status);
+  
+  display: inline-flex;
+  align-items: center;
+  padding: spacing(0.5) spacing(1);
+  border-radius: $border-radius-md;
+  background-color: rgba($status-color, 0.1);
+  color: $status-color;
+  font-weight: $font-weight-medium;
+  
+  &::before {
+    content: '';
+    display: inline-block;
+    width: spacing(1);
+    height: spacing(1);
+    margin-right: spacing(1);
+    border-radius: 50%;
+    background-color: currentColor;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Accessibility Mixins
+// -----------------------------------------------------------------------------
+
+@mixin high-contrast-mode {
+  @media (prefers-contrast: high) {
+    @content;
+  }
+}
+
+@mixin focus-visible {
+  &:focus-visible {
+    outline: 3px solid $color-primary;
+    outline-offset: 2px;
+    
+    @include high-contrast-mode {
+      outline-color: $color-black;
+    }
+  }
+}
+
+@mixin screen-reader-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// -----------------------------------------------------------------------------
+// Maritime-Specific UI Component Mixins
+// -----------------------------------------------------------------------------
+
+@mixin vessel-card {
+  padding: spacing(2);
+  border-radius: $border-radius-lg;
+  background-color: $color-white;
+  box-shadow: $shadow-md;
+  
+  @include respond-to('md') {
+    padding: spacing(3);
+  }
+  
+  @include high-contrast-mode {
+    border: 2px solid $color-black;
+    box-shadow: none;
+  }
+}
+
+@mixin berth-indicator($occupied: false) {
+  display: inline-block;
+  width: spacing(2);
+  height: spacing(2);
+  border-radius: 50%;
+  background-color: if($occupied, $color-error, $color-success);
+  
+  @include high-contrast-mode {
+    border: 2px solid currentColor;
+  }
+}
+
+@mixin maritime-button {
+  padding: spacing(1.5) spacing(3);
+  border-radius: $border-radius-md;
+  font-weight: $font-weight-medium;
+  transition: $transition-base;
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  @include focus-visible;
+  
+  @include respond-to('xs') {
+    padding: spacing(2) spacing(4); // Larger touch targets on mobile
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Performance Optimization Mixins
+// -----------------------------------------------------------------------------
+
+@mixin optimize-animation {
+  @media (prefers-reduced-motion: reduce) {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@mixin hardware-accelerate {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
