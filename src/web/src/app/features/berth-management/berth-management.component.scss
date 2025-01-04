@@ -1,0 +1,257 @@
+// Import maritime-specific variables and mixins
+@use '../../../../assets/styles/variables' as *;
+@use '../../../../assets/styles/mixins' as *;
+
+// Root variables for theme support and control room optimization
+:root {
+  --background-control-room: #{$color-gray-900};
+  --control-panel-bg: #{$color-gray-800};
+  --border-color: #{rgba($color-white, 0.1)};
+  --row-background: #{$color-gray-800};
+  --legend-background: #{$color-gray-700};
+  --timeline-text: #{$color-gray-300};
+  --allocation-hover-shadow: #{rgba($color-black, 0.3)};
+}
+
+// Light theme variables
+@media (prefers-color-scheme: light) {
+  :root {
+    --background-control-room: #{$color-white};
+    --control-panel-bg: #{$color-gray-100};
+    --border-color: #{rgba($color-black, 0.1)};
+    --row-background: #{$color-gray-50};
+    --legend-background: #{$color-gray-200};
+    --timeline-text: #{$color-gray-900};
+    --allocation-hover-shadow: #{rgba($color-black, 0.1)};
+  }
+}
+
+// Main container with control room optimizations
+.berth-management-container {
+  padding: spacing(2);
+  width: 100%;
+  height: 100vh;
+  background: var(--background-control-room);
+  overflow: hidden;
+  position: relative;
+
+  @include control-room-display {
+    padding: spacing(3);
+  }
+
+  @include respond-to('sm') {
+    padding: spacing(3) spacing(4);
+  }
+}
+
+// Enhanced timeline controls
+.timeline-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: $z-index-sticky;
+  background: var(--control-panel-bg);
+  padding: spacing(2);
+  border-bottom: 2px solid var(--border-color);
+  
+  @include respond-to('md') {
+    padding: spacing(2) spacing(3);
+  }
+
+  button {
+    @include maritime-button;
+  }
+}
+
+// Maritime-optimized timeline grid
+.berth-timeline {
+  @include vessel-timeline-grid(24, 'hourly');
+  margin-top: spacing(3);
+  
+  &__header {
+    display: grid;
+    grid-template-columns: 150px repeat(24, minmax(60px, 1fr));
+    gap: spacing(1);
+    position: sticky;
+    top: 64px;
+    background: var(--control-panel-bg);
+    padding: spacing(1) 0;
+    z-index: $z-index-sticky - 1;
+
+    .time-slot {
+      text-align: center;
+      color: var(--timeline-text);
+      font-weight: $font-weight-medium;
+      font-size: $font-size-sm;
+
+      @include control-room-display {
+        font-size: $font-size-md;
+      }
+    }
+  }
+}
+
+// Enhanced berth row with status indicators
+.berth-row {
+  display: flex;
+  align-items: center;
+  min-height: 80px;
+  border-bottom: 1px solid var(--border-color);
+  position: relative;
+  background: var(--row-background);
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background: rgba($color-primary, 0.05);
+  }
+
+  &__label {
+    width: 150px;
+    padding: spacing(2);
+    font-weight: $font-weight-medium;
+    color: var(--timeline-text);
+  }
+}
+
+// High-contrast vessel allocation block
+.allocation-block {
+  position: relative;
+  height: 60px;
+  border-radius: $border-radius-md;
+  cursor: pointer;
+  box-shadow: $shadow-sm;
+  transition: all 0.3s ease;
+  user-select: none;
+  touch-action: manipulation;
+
+  @include optimize-animation;
+  @include focus-visible;
+
+  @each $status, $color in $status-colors {
+    &--#{$status} {
+      background-color: rgba($color, 0.9);
+      border: 2px solid $color;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px var(--allocation-hover-shadow);
+      }
+
+      @include high-contrast-mode {
+        background-color: $color;
+        border-width: 3px;
+      }
+    }
+  }
+
+  &__content {
+    padding: spacing(1);
+    color: $color-white;
+    font-size: $font-size-sm;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    @include control-room-display {
+      font-size: $font-size-md;
+      padding: spacing(2);
+    }
+  }
+}
+
+// Enhanced timeline legend
+.legend {
+  display: flex;
+  gap: spacing(2);
+  margin-top: spacing(2);
+  padding: spacing(2);
+  background: var(--legend-background);
+  border-radius: $border-radius-md;
+  font-size: $font-size-sm;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: spacing(1);
+
+    &::before {
+      content: '';
+      display: block;
+      width: spacing(2);
+      height: spacing(2);
+      border-radius: $border-radius-sm;
+    }
+
+    @each $status, $color in $status-colors {
+      &--#{$status}::before {
+        background-color: $color;
+        border: 1px solid darken($color, 10%);
+
+        @include high-contrast-mode {
+          border-width: 2px;
+        }
+      }
+    }
+  }
+}
+
+// Responsive adjustments for different screen sizes
+@include respond-to('sm') {
+  .berth-timeline {
+    &__header {
+      .time-slot {
+        font-size: $font-size-md;
+      }
+    }
+  }
+
+  .allocation-block {
+    height: 70px;
+
+    &__content {
+      padding: spacing(2);
+    }
+  }
+}
+
+@include respond-to('lg') {
+  .berth-row {
+    min-height: 100px;
+
+    &__label {
+      width: 200px;
+    }
+  }
+
+  .allocation-block {
+    height: 80px;
+  }
+}
+
+// High contrast mode enhancements
+@include high-contrast-mode {
+  .berth-management-container {
+    border: 2px solid $color-black;
+  }
+
+  .timeline-controls {
+    border-bottom-width: 3px;
+  }
+
+  .berth-row {
+    border-bottom-width: 2px;
+  }
+}
+
+// Reduced motion optimizations
+@media (prefers-reduced-motion: reduce) {
+  .allocation-block {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+}
