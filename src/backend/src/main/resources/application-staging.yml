@@ -1,0 +1,98 @@
+# Vessel Call Management System - Staging Environment Configuration
+# Spring Boot Version: 3.1.x
+
+# Active Profile Configuration
+spring:
+  profiles:
+    active: staging
+  application:
+    name: vcms
+
+  # Database Configuration
+  datasource:
+    url: ${VCMS_DB_URL}
+    username: ${VCMS_DB_USERNAME}
+    password: ${VCMS_DB_PASSWORD}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+      validation-timeout: 5000
+      leak-detection-threshold: 60000
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+      order_inserts: true
+      order_updates: true
+      batch_versioned_data: true
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        jdbc:
+          time_zone: UTC
+          batch_size: 50
+          fetch_size: 100
+        cache:
+          use_second_level_cache: true
+          region.factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+        javax.cache.provider: org.ehcache.jsr107.EhcacheCachingProvider
+        query.fail_on_pagination_over_collection_fetch: true
+
+# Security Configuration
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        issuer-uri: ${JWT_ISSUER_URI}
+        jwk-set-uri: ${JWT_JWK_SET_URI}
+        jws-algorithm: RS256
+        public-key-location: ${JWT_PUBLIC_KEY_PATH}
+    client:
+      registration:
+        azure-ad:
+          client-id: ${AZURE_CLIENT_ID}
+          client-secret: ${AZURE_CLIENT_SECRET}
+          scope:
+            - openid
+            - profile
+            - email
+
+# Management & Monitoring Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - metrics
+          - prometheus
+          - loggers
+          - caches
+          - integrationgraph
+      base-path: /actuator
+      cors:
+        allowed-origins:
+          - https://staging.vcms.com
+        allowed-methods:
+          - GET
+  metrics:
+    tags:
+      application: vcms
+      environment: staging
+    distribution:
+      percentiles-histogram: true
+      sla:
+        - 10ms
+        - 50ms
+        - 100ms
+        - 200ms
+        - 500ms
+      minimum-expected-value: 1ms
+      maximum-expected-value: 1s
