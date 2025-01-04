@@ -1,0 +1,224 @@
+// =============================================================================
+// VESSEL CALL MANAGEMENT SYSTEM - SIDEBAR COMPONENT
+// Version: 1.0.0
+// =============================================================================
+
+// Import core styles
+@use '../../../../assets/styles/variables' as *;
+@use '../../../../assets/styles/mixins' as *;
+
+// -----------------------------------------------------------------------------
+// Sidebar Container
+// -----------------------------------------------------------------------------
+
+.sidebar {
+  position: fixed;
+  height: 100vh;
+  width: 250px;
+  background-color: $color-secondary;
+  padding: $spacing-unit * 2;
+  transition: all 0.3s ease;
+  z-index: $z-index-fixed;
+  box-shadow: $shadow-md;
+  overflow-y: auto;
+  overflow-x: hidden;
+  
+  // Accessibility enhancements
+  @include focus-visible;
+  
+  // High contrast mode support
+  @include high-contrast-mode {
+    background-color: $color-white;
+    border-right: 2px solid $color-black;
+    box-shadow: none;
+  }
+  
+  // Responsive behavior
+  @include respond-to('xs') {
+    width: 100%;
+    transform: translateX(-100%);
+    
+    &.expanded {
+      transform: translateX(0);
+    }
+  }
+  
+  @include respond-to('sm') {
+    width: 80px;
+    
+    &.expanded {
+      width: 250px;
+    }
+  }
+  
+  // Reduced motion support
+  @include optimize-animation;
+  
+  // Hardware acceleration for smooth transitions
+  @include hardware-accelerate;
+}
+
+// -----------------------------------------------------------------------------
+// Navigation Items
+// -----------------------------------------------------------------------------
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: $spacing-unit * 1.5;
+  color: $color-white;
+  cursor: pointer;
+  min-height: 48px; // Enhanced touch target
+  border-radius: $border-radius-md;
+  margin-bottom: $spacing-unit;
+  transition: $transition-base;
+  
+  // Accessibility focus state
+  @include focus-visible;
+  
+  // High contrast mode
+  @include high-contrast-mode {
+    color: $color-black;
+    border: 1px solid currentColor;
+  }
+  
+  // Hover state
+  &:hover {
+    background-color: rgba($color-white, 0.1);
+    
+    @include high-contrast-mode {
+      background-color: $color-gray-200;
+    }
+  }
+  
+  // Active state
+  &.active {
+    background-color: $color-primary;
+    font-weight: $font-weight-medium;
+    box-shadow: $shadow-sm;
+    
+    @include high-contrast-mode {
+      background-color: $color-black;
+      color: $color-white;
+    }
+  }
+  
+  // Enhanced touch targets for mobile
+  @include respond-to('xs') {
+    padding: $spacing-unit * 2;
+    margin-bottom: $spacing-unit * 1.5;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Navigation Icons
+// -----------------------------------------------------------------------------
+
+.nav-icon {
+  margin-right: $spacing-unit * 2;
+  font-size: 24px;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  // High contrast mode
+  @include high-contrast-mode {
+    color: currentColor;
+  }
+  
+  // Collapsed state
+  .sidebar:not(.expanded) & {
+    margin-right: 0;
+    
+    @include respond-to('sm') {
+      font-size: 28px; // Larger icons in collapsed state
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Navigation Labels
+// -----------------------------------------------------------------------------
+
+.nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: $font-size-md;
+  
+  // Collapsed state
+  .sidebar:not(.expanded) & {
+    display: none;
+    
+    @include respond-to('xs') {
+      display: block; // Always show labels on mobile
+    }
+  }
+  
+  // High contrast mode
+  @include high-contrast-mode {
+    font-weight: $font-weight-medium;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Divider
+// -----------------------------------------------------------------------------
+
+.nav-divider {
+  height: 1px;
+  background-color: rgba($color-white, 0.1);
+  margin: $spacing-unit * 2 0;
+  
+  @include high-contrast-mode {
+    background-color: $color-black;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Toggle Button
+// -----------------------------------------------------------------------------
+
+.sidebar-toggle {
+  position: absolute;
+  top: $spacing-unit;
+  right: -($spacing-unit * 4);
+  width: $spacing-unit * 4;
+  height: $spacing-unit * 4;
+  border-radius: 0 $border-radius-md $border-radius-md 0;
+  background-color: $color-secondary;
+  color: $color-white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  @include focus-visible;
+  
+  @include high-contrast-mode {
+    background-color: $color-black;
+    color: $color-white;
+    border: 2px solid currentColor;
+  }
+  
+  // Hide on mobile
+  @include respond-to('xs') {
+    display: none;
+  }
+  
+  // Enhanced touch target
+  @include respond-to('sm') {
+    width: $spacing-unit * 5;
+    height: $spacing-unit * 5;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Screen Reader Only Elements
+// -----------------------------------------------------------------------------
+
+.sr-only {
+  @include screen-reader-only;
+}
