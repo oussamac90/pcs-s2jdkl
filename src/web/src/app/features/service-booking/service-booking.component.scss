@@ -1,0 +1,236 @@
+// =============================================================================
+// SERVICE BOOKING COMPONENT STYLES
+// Version: 1.0.0
+// =============================================================================
+
+// Import core styles
+@use '../../../../assets/styles/variables' as *;
+@use '../../../../assets/styles/mixins' as *;
+@use '../../../../assets/styles/themes' as *;
+
+// -----------------------------------------------------------------------------
+// Container Layout
+// -----------------------------------------------------------------------------
+
+.service-booking-container {
+  display: flex;
+  flex-direction: column;
+  padding: spacing(2);
+  min-height: 100vh;
+  background-color: var(--background-color);
+  color: var(--text-color);
+
+  @include respond-to('sm') {
+    padding: spacing(3);
+  }
+
+  @include respond-to('md') {
+    padding: spacing(4);
+  }
+
+  // Control room optimizations
+  @include control-room-display {
+    padding: spacing(6);
+    font-size: $font-size-lg;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Booking Form
+// -----------------------------------------------------------------------------
+
+.booking-form {
+  @include vessel-card;
+  margin-top: spacing(3);
+  
+  // Enhanced focus management for form elements
+  &:focus-within {
+    outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+    outline-offset: 2px;
+  }
+
+  // Responsive layout adjustments
+  @include respond-to('sm') {
+    max-width: map-get($container-max-widths, 'sm');
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Service Selection Items
+// -----------------------------------------------------------------------------
+
+.service-item {
+  position: relative;
+  padding: spacing(2);
+  margin-bottom: spacing(2);
+  border: $border-width solid var(--border-color);
+  border-radius: $border-radius-md;
+  background-color: var(--item-background);
+
+  // Enhanced touch targets for mobile
+  @include respond-to('xs') {
+    padding: spacing(3);
+    margin-bottom: spacing(3);
+  }
+
+  // High contrast mode support
+  @include high-contrast-mode {
+    border-width: 2px;
+    border-color: currentColor;
+  }
+
+  // Service selection state
+  &--selected {
+    border-color: var(--vessel-highlight);
+    background-color: rgba($color-primary, 0.05);
+
+    @include high-contrast-mode {
+      background-color: transparent;
+      border-width: 3px;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Form Controls
+// -----------------------------------------------------------------------------
+
+.form-group {
+  margin-bottom: spacing(3);
+
+  label {
+    display: block;
+    margin-bottom: spacing(1);
+    font-weight: $font-weight-medium;
+    color: var(--text-color);
+
+    // Required field indicator
+    &.required::after {
+      content: "*";
+      color: var(--status-cancelled);
+      margin-left: spacing(0.5);
+    }
+  }
+
+  // Input field styling
+  input, select {
+    width: 100%;
+    padding: spacing(1.5);
+    border: $border-width solid var(--border-color);
+    border-radius: $border-radius-md;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-size: inherit;
+
+    @include focus-visible;
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    // Enhanced touch targets for mobile
+    @include respond-to('xs') {
+      padding: spacing(2);
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Cost Summary
+// -----------------------------------------------------------------------------
+
+.cost-summary {
+  margin-top: spacing(4);
+  padding-top: spacing(3);
+  border-top: $border-width solid var(--border-color);
+
+  .total-cost {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: var(--vessel-highlight);
+
+    @include high-contrast-mode {
+      text-decoration: underline;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Action Buttons
+// -----------------------------------------------------------------------------
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: spacing(2);
+  margin-top: spacing(4);
+
+  button {
+    @include maritime-button;
+
+    &.primary {
+      background-color: var(--vessel-highlight);
+      color: $color-white;
+
+      &:hover:not(:disabled) {
+        background-color: darken($color-primary, 10%);
+      }
+    }
+
+    &.secondary {
+      background-color: transparent;
+      border: $border-width solid var(--border-color);
+      color: var(--text-color);
+
+      &:hover:not(:disabled) {
+        background-color: var(--item-background);
+      }
+    }
+  }
+
+  // Stack buttons on mobile
+  @include respond-to('xs') {
+    flex-direction: column;
+    
+    button {
+      width: 100%;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Loading States
+// -----------------------------------------------------------------------------
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(var(--background-color), 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: $z-index-modal;
+
+  @include optimize-animation;
+}
+
+// -----------------------------------------------------------------------------
+// Error States
+// -----------------------------------------------------------------------------
+
+.error-message {
+  color: var(--status-cancelled);
+  font-size: $font-size-sm;
+  margin-top: spacing(1);
+  
+  @include high-contrast-mode {
+    font-weight: $font-weight-bold;
+    text-decoration: underline;
+  }
+}
