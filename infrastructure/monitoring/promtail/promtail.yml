@@ -1,0 +1,85 @@
+# Promtail Configuration v2.9.0
+# Enterprise-grade log collection and shipping configuration for VCMS
+
+server:
+  # HTTP server configuration for metrics and API endpoints
+  http_listen_port: 9080
+  grpc_listen_port: 0
+  log_level: info
+  http_server_read_timeout: 30s
+  http_server_write_timeout: 30s
+  grpc_server_max_recv_msg_size: 4194304
+
+# Positions file tracks the read positions of logs to prevent duplicate entries
+positions:
+  filename: /run/promtail/positions.yaml
+  sync_period: 10s
+  ignore_invalid_yaml: false
+
+# Loki client configuration with enhanced security and reliability features
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+    tenant_id: vcms
+    bearer_token_file: /run/secrets/loki/token
+    tls_config:
+      ca_file: /run/secrets/loki/ca.crt
+      insecure_skip_verify: false
+    
+    # Batch processing configuration for optimal performance
+    batchwait: 1s
+    batchsize: 1048576
+    timeout: 10s
+    
+    # Retry configuration for reliability
+    backoff_config:
+      min_period: 500ms
+      max_period: 5m
+      max_retries: 10
+    
+    # Environment labels for log context
+    external_labels:
+      cluster: vcms-prod
+      environment: production
+
+# Log scraping configuration for Kubernetes pods
+scrape_configs:
+  - job_name: kubernetes-pods
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: 
+            - vcms-prod
+            - vcms-monitoring
+    
+    # Relabeling configuration for rich metadata
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        target_label: app
+      
+      - source_labels: [__meta_kubernetes_pod_label_component]
+        target_label: component
+      
+      - source_labels: [__meta_kubernetes_pod_container_name]
+        target_label: container
+      
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      
+      - source_labels: [__meta_kubernetes_pod_node_name]
+        target_label: node
+      
+      - source_labels: [__meta_kubernetes_pod_uid]
+        target_label: pod_uid
+    
+    # Pipeline stages for log processing and enrichment
+    pipeline_stages:
+      # JSON parsing stage
+      - json:
+          expressions:
+            log_level: level
+            timestamp: ts
+            caller: caller
+      
+      # Label extraction stage
+      - labels:
+          log_level: level
