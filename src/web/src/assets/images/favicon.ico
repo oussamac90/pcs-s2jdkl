@@ -1,0 +1,26 @@
+[Binary ICO file content with the following specifications]
+
+Format: ICO (Windows Icon)
+Color: Primary Blue (#1976D2)
+Sizes included: 16x16, 32x32, 48x48
+Color depth: 32-bit with alpha channel
+Compression: RLE where applicable
+
+Image description:
+- Simple, clean design featuring a stylized ship/vessel symbol
+- Solid shapes for good visibility at small sizes
+- Primary color #1976D2 (Material Blue)
+- Transparent background for theme compatibility
+- Anti-aliased edges for smooth rendering
+- Optimized for both light and dark modes
+- High contrast ratio exceeding 4.5:1
+- Clear recognition at 16x16 size
+- Distinct appearance in browser tabs
+- Maskable for PWA support
+
+File characteristics:
+- Format: Microsoft ICO
+- Size: Optimized (<10KB)
+- Multiple resolutions in single file
+- Alpha channel support
+- PNG compression for each size
