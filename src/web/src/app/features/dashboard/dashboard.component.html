@@ -1,0 +1,154 @@
+<!-- Main dashboard container with accessibility support -->
+<div class="dashboard-container" role="main" aria-label="Dashboard Overview">
+  <!-- Dashboard header with real-time alerts -->
+  <div class="dashboard-header" role="banner">
+    <h1 class="dashboard-title" aria-level="1">Dashboard Overview</h1>
+    <div class="alerts-section" aria-live="polite">
+      <mat-icon [class.has-alerts]="(alertCount$ | async) > 0">notifications</mat-icon>
+      <span class="alert-count" *ngIf="(alertCount$ | async) > 0">
+        {{alertCount$ | async}}
+      </span>
+    </div>
+  </div>
+
+  <!-- Active vessel calls section -->
+  <mat-card class="vessel-summary-card" aria-label="Active Vessel Calls">
+    <mat-card-header>
+      <mat-card-title>Active Vessel Calls ({{(vesselCalls$ | async)?.length || 0}})</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <!-- Loading state -->
+      <app-loading *ngIf="loading$ | async"
+        [diameter]="50"
+        [color]="'primary'"
+        [mode]="'indeterminate'">
+      </app-loading>
+
+      <!-- Error state -->
+      <app-error *ngIf="error$ | async"
+        [errorMessage]="errorMessage"
+        [errorCode]="errorCode"
+        (retry)="retryLoad()">
+      </app-error>
+
+      <!-- Vessel calls grid -->
+      <table *ngIf="(vesselCalls$ | async)?.length && !(loading$ | async) && !(error$ | async)"
+        class="vessel-grid"
+        aria-label="Vessel Status Grid"
+        role="grid">
+        <thead>
+          <tr role="row">
+            <th role="columnheader" scope="col">Vessel</th>
+            <th role="columnheader" scope="col">Status</th>
+            <th role="columnheader" scope="col">Berth</th>
+            <th role="columnheader" scope="col">ETA/ETD</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let vessel of vesselCalls$ | async; trackBy: trackByVesselId"
+            role="row"
+            [attr.aria-label]="'Vessel ' + vessel.name">
+            <td role="gridcell">{{vessel.name}}</td>
+            <td role="gridcell">
+              <span class="status-badge" [class]="vessel.status | lowercase">
+                {{vessel.status}}
+              </span>
+            </td>
+            <td role="gridcell">{{vessel.berthNumber || 'Pending'}}</td>
+            <td role="gridcell">
+              <div class="time-info">
+                <span>{{vessel.eta | date:'HH:mm'}}</span>
+                <span>{{vessel.etd | date:'HH:mm'}}</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- No data state -->
+      <div *ngIf="(vesselCalls$ | async)?.length === 0 && !(loading$ | async) && !(error$ | async)"
+        class="no-data"
+        role="alert">
+        No active vessel calls at this time
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Berth utilization section -->
+  <mat-card class="berth-utilization-card" aria-label="Berth Utilization">
+    <mat-card-header>
+      <mat-card-title>Berth Utilization</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="utilization-container">
+        <mat-progress-bar
+          [value]="berthUtilization$ | async"
+          [color]="'primary'"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          [attr.aria-valuenow]="berthUtilization$ | async"
+          [attr.aria-label]="'Berth utilization at ' + (berthUtilization$ | async) + ' percent'">
+        </mat-progress-bar>
+        <span class="utilization-percentage">{{berthUtilization$ | async}}%</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Expected arrivals section -->
+  <mat-card class="expected-arrivals-card" aria-label="Expected Vessel Arrivals">
+    <mat-card-header>
+      <mat-card-title>Expected Arrivals Today</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <ul class="arrivals-list" role="list">
+        <li *ngFor="let arrival of expectedArrivals$ | async; trackBy: trackByVesselId"
+          role="listitem"
+          class="arrival-item">
+          <div class="arrival-time">{{arrival.eta | date:'HH:mm'}}</div>
+          <div class="vessel-info">
+            <span class="vessel-name">{{arrival.name}}</span>
+            <span class="vessel-type">{{arrival.type}}</span>
+          </div>
+          <mat-icon class="status-icon" [class]="arrival.status | lowercase">
+            {{getStatusIcon(arrival.status)}}
+          </mat-icon>
+        </li>
+      </ul>
+
+      <!-- No expected arrivals state -->
+      <div *ngIf="(expectedArrivals$ | async)?.length === 0"
+        class="no-data"
+        role="alert">
+        No expected arrivals for today
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Pending actions section -->
+  <mat-card class="pending-actions-card" aria-label="Pending Actions">
+    <mat-card-header>
+      <mat-card-title>Pending Actions</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <ul class="actions-list" role="list">
+        <li *ngFor="let action of pendingActions$ | async; trackBy: trackByActionId"
+          role="listitem"
+          class="action-item">
+          <button mat-button
+            [attr.aria-label]="action.description"
+            (click)="handleAction(action)">
+            <mat-icon>{{action.icon}}</mat-icon>
+            <span>{{action.description}} ({{action.count}})</span>
+          </button>
+        </li>
+      </ul>
+
+      <!-- No pending actions state -->
+      <div *ngIf="(pendingActions$ | async)?.length === 0"
+        class="no-data"
+        role="alert">
+        No pending actions
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
