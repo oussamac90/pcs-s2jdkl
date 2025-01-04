@@ -1,0 +1,77 @@
+// Gradle settings configuration for Vessel Call Management System
+// Spring Boot Version: 3.1.x
+// Architecture: Monolithic
+
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        maven {
+            url 'https://repo.spring.io/milestone'
+            // Required for Spring Boot 3.1.x milestone releases
+            mavenContent {
+                releasesOnly()
+            }
+        }
+    }
+    
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.namespace == 'org.springframework') {
+                useVersion(springBootVersion)
+            }
+        }
+    }
+    
+    buildCache {
+        local {
+            enabled = true
+            directory = new File(rootDir, 'build-cache')
+        }
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    
+    repositories {
+        mavenCentral()
+        maven {
+            url 'https://repo.spring.io/milestone'
+            mavenContent {
+                releasesOnly()
+            }
+        }
+    }
+    
+    versionCatalogs {
+        libs {
+            version('spring-boot', springBootVersion)
+        }
+    }
+}
+
+rootProject.name = 'vessel-call-management-system'
+
+// Enable Gradle build cache for improved performance
+enableFeaturePreview('STABLE_CONFIGURATION_CACHE')
+
+// Configure Gradle for optimal JVM performance
+gradle.projectsLoaded {
+    rootProject.allprojects {
+        tasks.withType(JavaCompile) {
+            options.encoding = 'UTF-8'
+        }
+    }
+}
+
+// Enable build scan for better build insights in CI/CD
+if (System.getenv('CI')) {
+    gradleEnterprise {
+        buildScan {
+            termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+            termsOfServiceAgree = 'yes'
+            publishAlways()
+        }
+    }
+}
