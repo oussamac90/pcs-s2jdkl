@@ -1,0 +1,156 @@
+<!-- Root application container with accessibility role -->
+<div class="app-container" role="application" aria-label="Vessel Call Management System">
+  <!-- Header component with user controls and sidebar toggle -->
+  <app-header
+    [currentUser]="currentUser"
+    (onLogout)="handleLogout()"
+    (toggleSidebar)="toggleSidebarVisibility()"
+    role="banner"
+    aria-label="Application header">
+  </app-header>
+
+  <!-- Main container with dynamic sidebar width -->
+  <div class="main-container" [ngClass]="{'sidebar-expanded': sidebarExpanded}">
+    <!-- Navigation sidebar with role-based menu -->
+    <app-sidebar
+      [isExpanded]="sidebarExpanded"
+      (toggleSidebar)="handleSidebarToggle()"
+      role="navigation"
+      aria-label="Main navigation"
+      [attr.aria-expanded]="sidebarExpanded">
+    </app-sidebar>
+
+    <!-- Main content area with router outlet -->
+    <main class="content-area" role="main" aria-label="Main content area">
+      <!-- Loading indicator for route changes -->
+      <div class="loading-indicator" *ngIf="isRouteLoading" role="status" aria-live="polite">
+        <mat-progress-bar mode="indeterminate" aria-label="Page loading indicator"></mat-progress-bar>
+      </div>
+
+      <!-- Dynamic content container -->
+      <div class="content-container" [ngClass]="{'loading': isRouteLoading}">
+        <router-outlet aria-live="polite"></router-outlet>
+      </div>
+
+      <!-- Offline status indicator -->
+      <div 
+        *ngIf="isOffline" 
+        class="offline-indicator" 
+        role="alert" 
+        aria-live="assertive">
+        <mat-icon aria-hidden="true">cloud_off</mat-icon>
+        You are currently offline. Some features may be unavailable.
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Skip to main content link for keyboard navigation -->
+<a 
+  href="#main-content" 
+  class="skip-link"
+  [class.visible]="isKeyboardUser"
+  (focus)="handleSkipLinkFocus()"
+  (blur)="handleSkipLinkBlur()">
+  Skip to main content
+</a>
+
+<!-- CSS classes for responsive layout -->
+<style>
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .main-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .content-area {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    padding: var(--content-padding);
+  }
+
+  .content-container {
+    min-height: 100%;
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  .content-container.loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .loading-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+  }
+
+  .offline-indicator {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .skip-link {
+    position: fixed;
+    top: -100px;
+    left: 0;
+    padding: 1rem;
+    background: var(--primary-color);
+    color: white;
+    z-index: 1001;
+    transition: top 0.2s ease-in-out;
+  }
+
+  .skip-link.visible {
+    top: 0;
+  }
+
+  /* Responsive breakpoints */
+  @media (max-width: 768px) {
+    .main-container {
+      flex-direction: column;
+    }
+
+    .content-area {
+      padding: var(--content-padding-mobile);
+    }
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .content-area {
+      padding: var(--content-padding-tablet);
+    }
+  }
+
+  @media (min-width: 1025px) {
+    .content-area {
+      padding: var(--content-padding-desktop);
+    }
+  }
+
+  /* High contrast mode support */
+  @media (forced-colors: active) {
+    .app-container {
+      forced-color-adjust: none;
+    }
+  }
+</style>
