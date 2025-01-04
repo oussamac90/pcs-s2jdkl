@@ -1,0 +1,173 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: vcms-alerts
+  namespace: vcms
+  labels:
+    app: vcms
+    component: monitoring
+    release: prometheus
+spec:
+  groups:
+    # System-level monitoring rules
+    - name: system.rules
+      rules:
+        # CPU Usage Warning
+        - alert: HighCPUUsage
+          expr: avg(rate(container_cpu_usage_seconds_total{namespace="vcms"}[5m])) by (pod) > 0.70
+          for: 5m
+          labels:
+            severity: warning
+            component: system
+          annotations:
+            summary: High CPU usage detected
+            description: Pod {{ $labels.pod }} CPU usage above 70% for 5 minutes
+
+        # CPU Usage Critical
+        - alert: CriticalCPUUsage
+          expr: avg(rate(container_cpu_usage_seconds_total{namespace="vcms"}[5m])) by (pod) > 0.85
+          for: 5m
+          labels:
+            severity: critical
+            component: system
+          annotations:
+            summary: Critical CPU usage detected
+            description: Pod {{ $labels.pod }} CPU usage above 85% for 5 minutes
+
+        # Memory Usage Warning
+        - alert: HighMemoryUsage
+          expr: container_memory_usage_bytes{namespace="vcms"} / container_spec_memory_limit_bytes{namespace="vcms"} > 0.75
+          for: 5m
+          labels:
+            severity: warning
+            component: system
+          annotations:
+            summary: High memory usage detected
+            description: Pod {{ $labels.pod }} memory usage above 75% for 5 minutes
+
+        # Memory Usage Critical
+        - alert: CriticalMemoryUsage
+          expr: container_memory_usage_bytes{namespace="vcms"} / container_spec_memory_limit_bytes{namespace="vcms"} > 0.90
+          for: 5m
+          labels:
+            severity: critical
+            component: system
+          annotations:
+            summary: Critical memory usage detected
+            description: Pod {{ $labels.pod }} memory usage above 90% for 5 minutes
+
+        # Disk Space Warning
+        - alert: HighDiskUsage
+          expr: kubelet_volume_stats_used_bytes{namespace="vcms"} / kubelet_volume_stats_capacity_bytes{namespace="vcms"} > 0.75
+          for: 5m
+          labels:
+            severity: warning
+            component: system
+          annotations:
+            summary: High disk usage detected
+            description: Volume {{ $labels.persistentvolumeclaim }} usage above 75%
+
+        # Disk Space Critical
+        - alert: CriticalDiskUsage
+          expr: kubelet_volume_stats_used_bytes{namespace="vcms"} / kubelet_volume_stats_capacity_bytes{namespace="vcms"} > 0.90
+          for: 5m
+          labels:
+            severity: critical
+            component: system
+          annotations:
+            summary: Critical disk usage detected
+            description: Volume {{ $labels.persistentvolumeclaim }} usage above 90%
+
+    # Application performance rules
+    - name: application.rules
+      rules:
+        # Response Time Warning
+        - alert: HighLatency
+          expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="vcms"}[5m])) by (le, service)) > 2
+          for: 5m
+          labels:
+            severity: warning
+            component: application
+          annotations:
+            summary: High latency detected
+            description: Service {{ $labels.service }} 95th percentile latency above 2 seconds
+
+        # Response Time Critical
+        - alert: CriticalLatency
+          expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="vcms"}[5m])) by (le, service)) > 5
+          for: 5m
+          labels:
+            severity: critical
+            component: application
+          annotations:
+            summary: Critical latency detected
+            description: Service {{ $labels.service }} 95th percentile latency above 5 seconds
+
+        # Error Rate Warning
+        - alert: HighErrorRate
+          expr: sum(rate(http_requests_total{namespace="vcms", status=~"5.."}[5m])) / sum(rate(http_requests_total{namespace="vcms"}[5m])) > 0.01
+          for: 5m
+          labels:
+            severity: warning
+            component: application
+          annotations:
+            summary: High error rate detected
+            description: Error rate above 1% for 5 minutes
+
+        # Error Rate Critical
+        - alert: CriticalErrorRate
+          expr: sum(rate(http_requests_total{namespace="vcms", status=~"5.."}[5m])) / sum(rate(http_requests_total{namespace="vcms"}[5m])) > 0.05
+          for: 5m
+          labels:
+            severity: critical
+            component: application
+          annotations:
+            summary: Critical error rate detected
+            description: Error rate above 5% for 5 minutes
+
+        # System Uptime SLA
+        - alert: LowUptimeSLA
+          expr: avg_over_time(up{namespace="vcms"}[24h]) < 0.999
+          for: 1h
+          labels:
+            severity: critical
+            component: application
+          annotations:
+            summary: System uptime below SLA
+            description: System uptime below 99.9% SLA threshold over 24h period
+
+    # Business KPI rules
+    - name: business.rules
+      rules:
+        # Berth Utilization
+        - alert: LowBerthUtilization
+          expr: avg_over_time(vcms_berth_utilization_percentage[24h]) < 70
+          for: 24h
+          labels:
+            severity: warning
+            component: business
+          annotations:
+            summary: Low berth utilization
+            description: Berth utilization below 70% target for 24 hours
+
+        # Vessel Waiting Time
+        - alert: HighVesselWaitingTime
+          expr: vcms_vessel_waiting_time_minutes > 120
+          for: 30m
+          labels:
+            severity: warning
+            component: business
+          annotations:
+            summary: Extended vessel waiting time
+            description: Vessel waiting time exceeds 2 hours target
+
+        # Service Booking Efficiency
+        - alert: LowServiceBookingEfficiency
+          expr: rate(vcms_service_bookings_successful[1h]) / rate(vcms_service_bookings_total[1h]) < 0.75
+          for: 1h
+          labels:
+            severity: warning
+            component: business
+          annotations:
+            summary: Low service booking efficiency
+            description: Service booking success rate below 75% target
