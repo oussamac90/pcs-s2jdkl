@@ -1,0 +1,176 @@
+<form [formGroup]="vesselCallForm" (ngSubmit)="onSubmit()" class="vessel-call-form" role="form" aria-label="Pre-Arrival Notification Form" aria-live="polite">
+  <!-- Loading State -->
+  <app-loading 
+    *ngIf="loading" 
+    [diameter]="50" 
+    [message]="'Submitting pre-arrival notification...'"
+    aria-live="polite">
+  </app-loading>
+
+  <!-- Error Display -->
+  <app-error 
+    *ngIf="error" 
+    [errorMessage]="error.message" 
+    [errorLevel]="error.severity"
+    [showRetry]="true"
+    (retry)="onSubmit()">
+  </app-error>
+
+  <!-- Form Progress -->
+  <mat-progress-bar 
+    *ngIf="loading" 
+    mode="determinate" 
+    [value]="progress" 
+    aria-label="Form submission progress">
+  </mat-progress-bar>
+
+  <!-- Vessel Details Section -->
+  <section class="form-section" aria-labelledby="vessel-details-heading">
+    <h2 id="vessel-details-heading" class="section-title">Vessel Details</h2>
+    
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>IMO Number</mat-label>
+      <input 
+        matInput
+        formControlName="imoNumber"
+        placeholder="Enter IMO number"
+        required
+        aria-required="true"
+        aria-describedby="imo-hint imo-error">
+      <mat-hint id="imo-hint">Enter 7-digit IMO number</mat-hint>
+      <mat-error id="imo-error" *ngIf="vesselCallForm.get('imoNumber')?.errors">
+        {{getErrorMessage('imoNumber')}}
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Vessel Name</mat-label>
+      <input 
+        matInput
+        formControlName="vesselName"
+        placeholder="Enter vessel name"
+        required
+        aria-required="true"
+        aria-describedby="vessel-name-error">
+      <mat-error id="vessel-name-error" *ngIf="vesselCallForm.get('vesselName')?.errors">
+        {{getErrorMessage('vesselName')}}
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Call Sign</mat-label>
+      <input 
+        matInput
+        formControlName="callSign"
+        placeholder="Enter call sign"
+        required
+        aria-required="true"
+        aria-describedby="call-sign-error">
+      <mat-error id="call-sign-error" *ngIf="vesselCallForm.get('callSign')?.errors">
+        {{getErrorMessage('callSign')}}
+      </mat-error>
+    </mat-form-field>
+  </section>
+
+  <!-- Schedule Section -->
+  <section class="form-section" aria-labelledby="schedule-heading">
+    <h2 id="schedule-heading" class="section-title">Schedule</h2>
+    
+    <div class="date-time-group">
+      <mat-form-field appearance="outline">
+        <mat-label>ETA Date</mat-label>
+        <input 
+          matInput
+          [matDatepicker]="etaPicker"
+          formControlName="etaDate"
+          required
+          aria-required="true"
+          aria-describedby="eta-date-error">
+        <mat-datepicker-toggle matSuffix [for]="etaPicker" aria-label="Select ETA date"></mat-datepicker-toggle>
+        <mat-datepicker #etaPicker></mat-datepicker>
+        <mat-error id="eta-date-error" *ngIf="vesselCallForm.get('etaDate')?.errors">
+          {{getErrorMessage('etaDate')}}
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>ETA Time</mat-label>
+        <input 
+          matInput
+          type="time"
+          formControlName="etaTime"
+          required
+          aria-required="true"
+          aria-describedby="eta-time-error">
+        <mat-error id="eta-time-error" *ngIf="vesselCallForm.get('etaTime')?.errors">
+          {{getErrorMessage('etaTime')}}
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </section>
+
+  <!-- Documents Section -->
+  <section class="form-section" aria-labelledby="documents-heading">
+    <h2 id="documents-heading" class="section-title">Required Documents</h2>
+    
+    <div class="document-upload-group">
+      <mat-checkbox 
+        formControlName="cargoManifest"
+        aria-describedby="cargo-manifest-error">
+        Cargo Manifest
+      </mat-checkbox>
+      <button 
+        mat-stroked-button
+        type="button"
+        [disabled]="!vesselCallForm.get('cargoManifest')?.value"
+        (click)="onUploadDocument('cargoManifest')"
+        aria-label="Upload cargo manifest">
+        <mat-icon>upload</mat-icon>
+        Upload
+      </button>
+      <mat-error id="cargo-manifest-error" *ngIf="vesselCallForm.get('cargoManifest')?.errors">
+        {{getErrorMessage('cargoManifest')}}
+      </mat-error>
+    </div>
+
+    <div class="document-upload-group">
+      <mat-checkbox 
+        formControlName="crewList"
+        aria-describedby="crew-list-error">
+        Crew List
+      </mat-checkbox>
+      <button 
+        mat-stroked-button
+        type="button"
+        [disabled]="!vesselCallForm.get('crewList')?.value"
+        (click)="onUploadDocument('crewList')"
+        aria-label="Upload crew list">
+        <mat-icon>upload</mat-icon>
+        Upload
+      </button>
+      <mat-error id="crew-list-error" *ngIf="vesselCallForm.get('crewList')?.errors">
+        {{getErrorMessage('crewList')}}
+      </mat-error>
+    </div>
+  </section>
+
+  <!-- Form Actions -->
+  <div class="form-actions">
+    <button 
+      mat-button
+      type="button"
+      (click)="onReset()"
+      [disabled]="loading"
+      aria-label="Reset form">
+      Reset
+    </button>
+    <button 
+      mat-raised-button
+      color="primary"
+      type="submit"
+      [disabled]="!vesselCallForm.valid || loading"
+      aria-label="Submit pre-arrival notification">
+      Submit
+    </button>
+  </div>
+</form>
