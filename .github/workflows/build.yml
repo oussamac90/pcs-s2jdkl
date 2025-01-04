@@ -1,0 +1,150 @@
+name: VCMS Build Pipeline
+
+on:
+  push:
+    branches: 
+      - main
+      - develop
+      - 'feature/*'
+    paths:
+      - 'src/backend/**'
+      - 'src/web/**'
+      - 'build.gradle'
+      - 'package.json'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/backend/**'
+      - 'src/web/**'
+      - 'build.gradle'
+      - 'package.json'
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday at midnight
+
+env:
+  JAVA_VERSION: '17'
+  NODE_VERSION: '18.x'
+  GRADLE_OPTS: '-Dorg.gradle.daemon=false'
+  NPM_CONFIG_PRODUCTION: 'false'
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    environment: development
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Required for SonarQube analysis
+          
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'gradle'
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'src/web/package-lock.json'
+          
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+            
+      - name: Cache npm packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Build and Test Backend
+        run: |
+          cd src/backend
+          ./gradlew clean build test jacocoTestReport
+          
+      - name: Build and Test Frontend
+        run: |
+          cd src/web
+          npm ci
+          npm run lint
+          npm run test:coverage
+          npm run build:prod
+          
+      - name: SonarQube Analysis
+        uses: SonarSource/sonarqube-scan-action@v1.2.0
+        env:
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          
+      - name: Build Backend Docker Image
+        run: |
+          docker build -t ${{ env.DOCKER_REGISTRY }}/vcms-backend:${{ github.sha }} -f src/backend/Dockerfile .
+          
+      - name: Build Frontend Docker Image
+        run: |
+          docker build -t ${{ env.DOCKER_REGISTRY }}/vcms-frontend:${{ github.sha }} -f src/web/Dockerfile .
+          
+      - name: Container Security Scan
+        uses: aquasecurity/trivy-action@0.11.2
+        with:
+          image-ref: '${{ env.DOCKER_REGISTRY }}/vcms-backend:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+          
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            src/backend/build/libs/*.jar
+            src/web/dist
+            src/backend/build/reports/tests
+            src/backend/build/reports/jacoco
+            src/web/coverage
+            
+  security_scan:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+    environment: security
+    needs: build
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        
+      - name: OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME }}
+        with:
+          project: 'VCMS'
+          path: '.'
+          format: 'HTML'
+          
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            reports
+            dependency-check-report.html
