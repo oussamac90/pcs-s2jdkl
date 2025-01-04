@@ -1,0 +1,157 @@
+<!-- Main container with Material elevation and accessibility attributes -->
+<div class="vessel-calls-container mat-elevation-z8" role="main" aria-label="Vessel Calls Management">
+  <!-- Header section with title and action buttons -->
+  <header class="header-section">
+    <h1 class="mat-headline-5" role="heading" aria-level="1">Vessel Calls Management</h1>
+    <div class="actions-container">
+      <button mat-raised-button color="primary" 
+              (click)="openCreateDialog()"
+              aria-label="Create new vessel call">
+        <mat-icon>add</mat-icon>
+        Create New Vessel Call
+      </button>
+      <button mat-stroked-button 
+              (click)="exportData()"
+              aria-label="Export vessel calls data">
+        <mat-icon>download</mat-icon>
+        Export Data
+      </button>
+    </div>
+  </header>
+
+  <!-- Filters section with search, status, and date filters -->
+  <section class="filters-container mat-elevation-z2" aria-label="Filters">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search vessels</mat-label>
+      <input matInput (input)="applyFilter($event)" 
+             placeholder="Search by vessel name, IMO number..."
+             aria-label="Search vessels">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-button-toggle-group class="status-filter" 
+                            (change)="filterByStatus($event.value)"
+                            aria-label="Filter by status">
+      <mat-button-toggle value="ALL">All</mat-button-toggle>
+      <mat-button-toggle value="PLANNED">Planned</mat-button-toggle>
+      <mat-button-toggle value="ARRIVED">Arrived</mat-button-toggle>
+      <mat-button-toggle value="AT_BERTH">At Berth</mat-button-toggle>
+      <mat-button-toggle value="DEPARTED">Departed</mat-button-toggle>
+      <mat-button-toggle value="CANCELLED">Cancelled</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <mat-form-field appearance="outline" class="date-filter">
+      <mat-label>Date range</mat-label>
+      <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker">
+        <input matStartDate formControlName="start" placeholder="Start date">
+        <input matEndDate formControlName="end" placeholder="End date">
+      </mat-date-range-input>
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-date-range-picker #picker></mat-date-range-picker>
+    </mat-form-field>
+  </section>
+
+  <!-- Main content section with loading, error states and data table -->
+  <section class="content-container" aria-live="polite">
+    <!-- Loading indicator -->
+    <app-loading *ngIf="loading$ | async"
+                 [diameter]="50"
+                 [color]="'primary'"
+                 [loadingText]="'Loading vessel calls...'">
+    </app-loading>
+
+    <!-- Error display -->
+    <app-error *ngIf="error$ | async as error"
+               [errorMessage]="error"
+               [showRetry]="true"
+               (retry)="retryLastAction()">
+    </app-error>
+
+    <!-- Data table with accessibility support -->
+    <table mat-table [dataSource]="vesselCalls$ | async"
+           matSort
+           class="vessel-calls-table"
+           aria-label="Vessel calls table"
+           *ngIf="!(loading$ | async) && !(error$ | async)">
+
+      <!-- Vessel Name Column -->
+      <ng-container matColumnDef="vesselName">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Vessel Name</th>
+        <td mat-cell *matCellDef="let call">{{call.vesselName}}</td>
+      </ng-container>
+
+      <!-- IMO Number Column -->
+      <ng-container matColumnDef="imoNumber">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>IMO Number</th>
+        <td mat-cell *matCellDef="let call">{{call.imoNumber}}</td>
+      </ng-container>
+
+      <!-- ETA Column -->
+      <ng-container matColumnDef="eta">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>ETA</th>
+        <td mat-cell *matCellDef="let call">{{call.eta | date:'medium'}}</td>
+      </ng-container>
+
+      <!-- ETD Column -->
+      <ng-container matColumnDef="etd">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>ETD</th>
+        <td mat-cell *matCellDef="let call">{{call.etd | date:'medium'}}</td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+        <td mat-cell *matCellDef="let call">
+          <mat-chip-list aria-label="Vessel call status">
+            <mat-chip [ngClass]="'status-' + call.status.toLowerCase()"
+                     [attr.aria-label]="'Status: ' + call.status">
+              {{call.status}}
+            </mat-chip>
+          </mat-chip-list>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let call">
+          <button mat-icon-button
+                  [matTooltip]="'Edit vessel call'"
+                  (click)="openEditDialog(call.id)"
+                  aria-label="Edit vessel call">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button
+                  [matTooltip]="'Delete vessel call'"
+                  (click)="deleteVesselCall(call.id)"
+                  aria-label="Delete vessel call">
+            <mat-icon>delete</mat-icon>
+          </button>
+          <button mat-icon-button
+                  [matTooltip]="'View details'"
+                  (click)="viewDetails(call.id)"
+                  aria-label="View vessel call details">
+            <mat-icon>visibility</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+          [attr.aria-label]="'Vessel call for ' + row.vesselName"></tr>
+    </table>
+
+    <!-- No data message -->
+    <div class="no-data-message" *ngIf="!(vesselCalls$ | async)?.length && !(loading$ | async)"
+         role="alert" aria-live="polite">
+      No vessel calls found
+    </div>
+
+    <!-- Pagination -->
+    <mat-paginator [pageSize]="10"
+                   [pageSizeOptions]="[5, 10, 25, 50]"
+                   showFirstLastButtons
+                   aria-label="Select page of vessel calls">
+    </mat-paginator>
+  </section>
+</div>
