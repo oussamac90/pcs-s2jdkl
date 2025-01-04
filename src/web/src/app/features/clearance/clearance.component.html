@@ -1,0 +1,98 @@
+<main class="clearance-container" role="main" aria-label="Vessel clearance management interface">
+  <!-- Loading State -->
+  <app-loading 
+    *ngIf="(loading$ | async) && !(error$ | async)"
+    [diameter]="50"
+    color="primary"
+    [message]="'Loading clearance data...'"
+    aria-live="polite">
+  </app-loading>
+
+  <!-- Error State -->
+  <div 
+    *ngIf="error$ | async as error"
+    class="clearance-error" 
+    role="alert"
+    aria-live="assertive">
+    <mat-icon class="error-icon">error</mat-icon>
+    <p class="error-message">{{ error.message }}</p>
+    <button 
+      mat-raised-button 
+      color="primary"
+      (click)="refreshClearances()"
+      aria-label="Retry loading clearance data">
+      Retry
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!(loading$ | async) && !(error$ | async)" class="clearance-content">
+    <!-- Breadcrumb Navigation -->
+    <nav class="clearance-breadcrumb" aria-label="Breadcrumb navigation">
+      <ol class="breadcrumb-list">
+        <li><a href="/" aria-label="Go to home">Home</a></li>
+        <li aria-current="page">Clearance Management</li>
+      </ol>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="clearance-header" role="banner">
+      <h1 tabindex="0" class="clearance-title">Vessel Clearance Management</h1>
+      <div class="header-actions">
+        <button 
+          mat-raised-button 
+          color="primary"
+          (click)="refreshClearances()"
+          [disabled]="refreshing$ | async"
+          aria-label="Refresh clearance data"
+          class="refresh-button">
+          <mat-icon>refresh</mat-icon>
+          {{(refreshing$ | async) ? 'Refreshing...' : 'Refresh'}}
+        </button>
+      </div>
+    </header>
+
+    <!-- Progress Indicator -->
+    <div class="clearance-progress" role="progressbar">
+      <mat-progress-bar
+        mode="determinate"
+        [value]="progress$ | async"
+        aria-label="Clearance workflow progress"
+        class="progress-bar">
+      </mat-progress-bar>
+      <span class="progress-label" aria-live="polite">
+        Progress: {{progress$ | async}}%
+      </span>
+    </div>
+
+    <!-- Clearance Workflow Component -->
+    <app-clearance-workflow
+      [vesselCallId]="currentVesselCallId"
+      (statusUpdate)="onStatusUpdate($event)"
+      (errorState)="onError($event)"
+      class="clearance-workflow"
+      role="region"
+      aria-label="Clearance workflow management">
+    </app-clearance-workflow>
+
+    <!-- Keyboard Shortcuts Help -->
+    <div class="keyboard-shortcuts" role="complementary" aria-label="Keyboard shortcuts">
+      <button 
+        mat-icon-button
+        [matTooltip]="'Press R to refresh clearance data'"
+        aria-label="View keyboard shortcuts">
+        <mat-icon>keyboard</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- No Data State -->
+  <div 
+    *ngIf="!(loading$ | async) && !(error$ | async) && !(hasClearances$ | async)"
+    class="no-data-state"
+    role="status"
+    aria-live="polite">
+    <mat-icon class="no-data-icon">info</mat-icon>
+    <p class="no-data-message">No clearance data available</p>
+  </div>
+</main>
