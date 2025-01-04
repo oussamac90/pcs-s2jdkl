@@ -1,0 +1,88 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: vcms-backend-hpa
+  namespace: vcms
+  labels:
+    app: vcms
+    component: autoscaling
+    tier: backend
+    managed-by: kubernetes
+  annotations:
+    description: "HPA for VCMS backend service"
+    monitoring.vcms.io/scrape: "true"
+    # Version of autoscaling/v2 API: v1.24+
+    kubernetes.io/autoscaling-api-version: "v2"
+    # Indicates monitoring integration for scaling decisions
+    monitoring.vcms.io/metric-sources: "resource-metrics,prometheus,application-metrics"
+    # Alert configurations for scaling events
+    monitoring.vcms.io/alert-scaling-events: "true"
+    monitoring.vcms.io/alert-threshold-breaches: "true"
+    monitoring.vcms.io/alert-stabilization-failures: "true"
+
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: vcms-backend
+
+  # Replica range for high availability and peak load handling
+  minReplicas: 2
+  maxReplicas: 10
+
+  # Multi-metric scaling configuration
+  metrics:
+    # CPU-based scaling
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+    # Memory-based scaling
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 75
+
+    # Custom metrics for application-specific scaling
+    - type: Pods
+      pods:
+        metric:
+          name: response_time_milliseconds
+        target:
+          type: AverageValue
+          averageValue: 3000
+
+    - type: Pods
+      pods:
+        metric:
+          name: request_queue_length
+        target:
+          type: AverageValue
+          averageValue: 1000
+
+  # Scaling behavior configuration for stability
+  behavior:
+    # Scale up configuration
+    scaleUp:
+      # Quick response to increased load
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Pods
+        value: 2
+        periodSeconds: 60
+      selectPolicy: Max
+
+    # Scale down configuration
+    scaleDown:
+      # Conservative scale down to prevent thrashing
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 120
+      selectPolicy: Max
