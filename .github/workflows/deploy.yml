@@ -1,0 +1,163 @@
+name: Deploy to AKS
+
+on:
+  workflow_run:
+    workflows: ["build.yml"]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      deploy_env:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - staging
+          - production
+      deployment_strategy:
+        description: 'Deployment strategy'
+        required: true
+        default: 'rolling'
+        type: choice
+        options:
+          - rolling
+          - blue-green
+
+env:
+  AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+  AKS_CLUSTER_NAME: ${{ secrets.AKS_CLUSTER_NAME }}
+  AKS_RESOURCE_GROUP: ${{ secrets.AKS_RESOURCE_GROUP }}
+  ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}
+  DEPLOYMENT_NAMESPACE: ${{ secrets.DEPLOYMENT_NAMESPACE }}
+  HEALTH_CHECK_ENDPOINT: ${{ secrets.HEALTH_CHECK_ENDPOINT }}
+  DEPLOYMENT_TIMEOUT: '600s'
+  MAX_SURGE: '25%'
+  MAX_UNAVAILABLE: '0%'
+
+jobs:
+  deploy:
+    name: Deploy to AKS
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.deployment_url }}
+    concurrency:
+      group: production
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build_artifacts
+          path: artifacts
+
+      - name: Download test results
+        uses: actions/download-artifact@v3
+        with:
+          name: test_results
+          path: test-results
+
+      - name: Download security scan results
+        uses: actions/download-artifact@v3
+        with:
+          name: security_scan_results
+          path: security-results
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ env.AZURE_CREDENTIALS }}
+
+      - name: Set AKS Context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ env.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ env.AKS_CLUSTER_NAME }}
+          admin: true
+
+      - name: Validate Kubernetes manifests
+        run: |
+          kubectl apply --dry-run=client -f infrastructure/kubernetes/backend-deployment.yaml
+          kubectl apply --dry-run=client -f infrastructure/kubernetes/frontend-deployment.yaml
+
+      - name: Generate deployment manifests
+        uses: azure/k8s-bake@v2
+        with:
+          renderEngine: 'helm'
+          helmChart: './infrastructure/helm'
+          overrideFiles: |
+            ./infrastructure/helm/values-${{ github.event.inputs.deploy_env || 'production' }}.yaml
+          overrides: |
+            image.tag=${{ github.sha }}
+            deployment.strategy=${{ github.event.inputs.deployment_strategy || 'rolling' }}
+        id: bake
+
+      - name: Deploy to AKS
+        uses: azure/k8s-deploy@v4
+        id: deploy
+        with:
+          namespace: ${{ env.DEPLOYMENT_NAMESPACE }}
+          manifests: ${{ steps.bake.outputs.manifestsBundle }}
+          strategy: ${{ github.event.inputs.deployment_strategy || 'rolling' }}
+          timeout: ${{ env.DEPLOYMENT_TIMEOUT }}
+          rollback-on-failure: true
+          force: false
+          images: |
+            ${{ env.ACR_REGISTRY }}/vcms/backend:${{ github.sha }}
+            ${{ env.ACR_REGISTRY }}/vcms/frontend:${{ github.sha }}
+          health-check: |
+            endpoint: ${{ env.HEALTH_CHECK_ENDPOINT }}
+            initial-delay: 60
+            interval: 30
+            timeout: 10
+            retries: 3
+          rolling-update-config: |
+            maxSurge: ${{ env.MAX_SURGE }}
+            maxUnavailable: ${{ env.MAX_UNAVAILABLE }}
+
+      - name: Verify deployment health
+        run: |
+          kubectl rollout status deployment/vcms-backend -n ${{ env.DEPLOYMENT_NAMESPACE }} --timeout=300s
+          kubectl rollout status deployment/vcms-frontend -n ${{ env.DEPLOYMENT_NAMESPACE }} --timeout=300s
+          
+          # Verify pod health
+          kubectl get pods -n ${{ env.DEPLOYMENT_NAMESPACE }} -l app=vcms --no-headers | \
+          awk '$3!="Running" {err=1} END {exit err}'
+
+      - name: Configure monitoring
+        run: |
+          kubectl apply -f infrastructure/kubernetes/monitoring/
+          kubectl rollout status deployment/prometheus -n monitoring
+          kubectl rollout status deployment/grafana -n monitoring
+
+      - name: Update deployment status
+        if: always()
+        run: |
+          if [[ "${{ job.status }}" == "success" ]]; then
+            echo "::set-output name=deployment_status::success"
+            echo "::set-output name=deployment_url::https://${{ env.DEPLOYMENT_NAMESPACE }}.vcms.azure.com"
+          else
+            echo "::set-output name=deployment_status::failure"
+            exit 1
+          fi
+
+      - name: Notify deployment status
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const status = '${{ job.status }}' === 'success' ? '✅ Success' : '❌ Failure';
+            const environment = '${{ github.event.inputs.deploy_env || 'production' }}';
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Deployment to ${environment} status: ${status}\nDeployment URL: ${{ steps.deploy.outputs.deployment_url }}`
+            })
