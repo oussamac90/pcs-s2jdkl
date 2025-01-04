@@ -1,0 +1,116 @@
+# Build Output and Compiled Files
+build/
+out/
+bin/
+target/
+.gradle/
+*.class
+*.jar
+!gradle-wrapper.jar
+*.war
+
+# IDE and Editor Files
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+.vscode/
+*.sublime-*
+*.swp
+*.swo
+.factorypath
+
+# Logs and Debug Files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+spring.log*
+
+# Sensitive Configuration Files
+application-*.yml
+!application-example.yml
+*.properties
+!gradle-wrapper.properties
+*.env
+*.key
+*.pem
+*.p12
+*.jks
+secrets.yml
+credentials.json
+
+# Temporary and System Files
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+temp/
+tmp/
+*.tmp
+*.bak
+
+# Test and Coverage Reports
+test-output/
+reports/
+coverage/
+jacoco/
+*.test.ts.snap
+junit/
+surefire-reports/
+
+# Cloud and Infrastructure Configuration
+azure.properties
+kubernetes/*.secret.yml
+terraform.tfstate*
+.terraform/
+*.tfvars
+
+# Keep Empty Directories
+!.gitkeep
+
+# Maven (if used alongside Gradle)
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+
+# Node (if using Node tools)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# OS Generated Files
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+desktop.ini
+
+# Backup Files
+**/*~
+**/*.bak
+**/*.sw[a-p]
+
+# Spring Boot Specific
+spring-boot-*.pid
+.spring-boot-devtools.properties
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Misc Development Files
+*.patch
+*.diff
+*.orig
+*.rej
+*.db
