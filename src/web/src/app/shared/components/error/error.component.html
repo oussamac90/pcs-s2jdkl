@@ -1,0 +1,43 @@
+<div class="error-container" role="alert" aria-live="assertive">
+  <mat-card class="error-card" [ngClass]="{
+    'error-card--night-mode': isNightMode,
+    'error-card--high-contrast': isHighContrast
+  }">
+    <mat-card-header>
+      <mat-icon class="error-icon" aria-hidden="true" role="presentation">error</mat-icon>
+      <mat-card-title class="maritime-heading" aria-level="2">{{errorTitle}}</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <p class="error-message maritime-text" [attr.aria-label]="'Error description'">
+        {{errorMessage}}
+      </p>
+      
+      <p *ngIf="errorDetails" 
+         class="error-details maritime-text" 
+         [attr.aria-label]="'Additional error details'">
+        {{errorDetails}}
+      </p>
+    </mat-card-content>
+
+    <mat-card-actions align="center" class="maritime-actions">
+      <button mat-button
+              *ngIf="showRetry"
+              class="maritime-button"
+              (click)="onRetry()"
+              aria-label="Retry action"
+              tabindex="0">
+        Retry
+      </button>
+      
+      <button mat-button
+              *ngIf="showDismiss"
+              class="maritime-button"
+              (click)="onDismiss()"
+              aria-label="Dismiss error"
+              tabindex="0">
+        Dismiss
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
