@@ -1,0 +1,118 @@
+# Alertmanager Configuration v0.25.0
+# Implements alert routing and notification policies for the Vessel Call Management System
+
+global:
+  # Time to wait before resending an alert to a receiver
+  resolve_timeout: 5m
+
+  # SMTP configuration for email notifications
+  smtp_smarthost: smtp.company.com:587
+  smtp_from: alertmanager@vcms.com
+  smtp_auth_username: ${SMTP_USERNAME}
+  smtp_auth_password: ${SMTP_PASSWORD}
+  smtp_require_tls: true
+
+  # Slack webhook configuration
+  slack_api_url: ${SLACK_WEBHOOK_URL}
+
+  # PagerDuty configuration
+  pagerduty_url: https://events.pagerduty.com/v2/enqueue
+
+# Alert template files location
+templates:
+  - /etc/alertmanager/templates/*.tmpl
+
+# Main routing tree configuration
+route:
+  # Group alerts by these labels
+  group_by: ['alertname', 'cluster', 'service', 'severity']
+  
+  # Initial wait time before sending grouped alerts
+  group_wait: 30s
+  
+  # Minimum time interval between sending two groups
+  group_interval: 5m
+  
+  # Time before resending an alert
+  repeat_interval: 4h
+  
+  # Default receiver if no routes match
+  receiver: default-receiver
+
+  # Nested routes for different severity levels
+  routes:
+    # Critical severity route
+    - match:
+        severity: critical
+      receiver: critical-alerts
+      group_wait: 0s
+      repeat_interval: 1h
+      continue: true
+
+    # Warning severity route
+    - match:
+        severity: warning
+      receiver: warning-alerts
+      group_wait: 30s
+      repeat_interval: 4h
+
+# Rules to prevent notification spam
+inhibit_rules:
+  # Inhibit warning alerts if there is a critical alert for same alertname/cluster/service
+  - source_match:
+      severity: critical
+    target_match:
+      severity: warning
+    equal: ['alertname', 'cluster', 'service']
+
+# Alert receivers configuration
+receivers:
+  # Default receiver for unmatched alerts
+  - name: default-receiver
+    email_configs:
+      - to: ops-team@company.com
+        send_resolved: true
+        require_tls: true
+
+  # Critical alerts receiver with multiple notification channels
+  - name: critical-alerts
+    email_configs:
+      - to: emergency-team@company.com
+        send_resolved: true
+        require_tls: true
+    slack_configs:
+      - channel: '#vcms-critical-alerts'
+        send_resolved: true
+        title: '{{ .GroupLabels.alertname }}'
+        text: '{{ .CommonAnnotations.description }}'
+        parse: 'full'
+        icon_emoji: ':warning:'
+        actions:
+          - type: button
+            text: 'View Alert'
+            url: '{{ .GeneratorURL }}'
+    pagerduty_configs:
+      - service_key: ${PAGERDUTY_SERVICE_KEY}
+        send_resolved: true
+        severity: '{{ .CommonLabels.severity }}'
+        client: 'VCMS Alertmanager'
+        client_url: '{{ .GeneratorURL }}'
+        description: '{{ .CommonAnnotations.description }}'
+
+  # Warning alerts receiver with email and Slack notifications
+  - name: warning-alerts
+    email_configs:
+      - to: ops-team@company.com
+        send_resolved: true
+        require_tls: true
+    slack_configs:
+      - channel: '#vcms-alerts'
+        send_resolved: true
+        title: '{{ .GroupLabels.alertname }}'
+        text: '{{ .CommonAnnotations.description }}'
+        parse: 'full'
+        icon_emoji: ':warning:'
+        actions:
+          - type: button
+            text: 'View Alert'
+            url: '{{ .GeneratorURL }}'
