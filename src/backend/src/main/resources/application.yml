@@ -1,0 +1,143 @@
+# Primary configuration file for Vessel Call Management System
+# Spring Boot Version: 3.1.x
+
+spring:
+  application:
+    name: vcms
+  
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+    group:
+      dev: ["dev"]
+      staging: ["staging"]
+      prod: ["prod"]
+
+  # Database Configuration with HikariCP
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+      auto-commit: false
+
+  # JPA Configuration with Performance Optimization
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+        id.new_generator_mappings: true
+        connection.provider_disables_autocommit: true
+        cache:
+          use_second_level_cache: true
+          use_query_cache: true
+        generate_statistics: true
+        cache.region.factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+
+  # Redis Cache Configuration
+  cache:
+    type: redis
+    redis:
+      time-to-live: ${CACHE_TTL:3600}
+      key-prefix: vcms:
+      use-key-prefix: true
+      cache-null-values: false
+
+  # Security Configuration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI}
+          jwk-set-uri: ${JWT_JWK_SET_URI}
+
+# Server Configuration
+server:
+  port: 8080
+  compression:
+    enabled: true
+    mime-types:
+      - application/json
+      - application/xml
+      - text/html
+      - text/xml
+      - text/plain
+    min-response-size: 1024
+  http2:
+    enabled: true
+  tomcat:
+    max-threads: 200
+    min-spare-threads: 10
+    max-connections: 10000
+    accept-count: 100
+
+# Management & Monitoring Configuration
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include:
+          - health
+          - info
+          - metrics
+          - prometheus
+          - loggers
+          - caches
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: ["db", "redis", "diskSpace"]
+        liveness:
+          include: ["ping"]
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram: true
+      sla:
+        http: [100, 200, 400, 500]
+
+# Application Specific Configuration
+app:
+  async:
+    core-pool-size: 8
+    max-pool-size: 50
+    queue-capacity: 10000
+    thread-name-prefix: vcms-async-
+  
+  security:
+    jwt:
+      token-validity-in-seconds: 86400
+      token-validity-in-seconds-for-remember-me: 2592000
+      base64-secret: ${JWT_BASE64_SECRET:changeit}
+    authentication:
+      jwt:
+        secret: ${JWT_SECRET}
+        base64-secret: ${JWT_BASE64_SECRET}
+        token-validity-in-seconds: 86400
+        token-validity-in-seconds-for-remember-me: 2592000
+  
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:*}
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+      - PATCH
+    allowed-headers: ["*"]
+    exposed-headers:
+      - Authorization
+      - Link
+      - X-Total-Count
+    allow-credentials: true
+    max-age: 1800
