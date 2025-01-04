@@ -1,0 +1,20 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: vcms-premium-ssd
+  labels:
+    app: vcms
+    type: storage
+    tier: premium
+provisioner: kubernetes.io/azure-disk
+parameters:
+  storageaccounttype: Premium_LRS
+  kind: Managed
+  cachingmode: ReadWrite
+  zones: "1,2,3"
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+mountOptions:
+  - noatime
+  - nodiratime
