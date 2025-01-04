@@ -1,0 +1,209 @@
+// Import core design tokens and maritime-specific variables
+@use '../../../assets/styles/variables' as *;
+@use '../../../assets/styles/mixins' as *;
+
+// =============================================================================
+// BERTH TIMELINE COMPONENT STYLES
+// Enhanced for maritime operations with outdoor visibility and touch interactions
+// =============================================================================
+
+.berth-timeline-container {
+  position: relative;
+  width: 100%;
+  min-height: calc(100vh - #{$spacing-unit * 8});
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  background-color: $color-gray-100;
+  box-shadow: $shadow-md;
+  
+  // Enhanced scrollbar styling for better visibility
+  &::-webkit-scrollbar {
+    height: $spacing-unit * 1.5;
+    
+    @include respond-to('sm') {
+      height: $spacing-unit * 2;
+    }
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: $color-gray-200;
+    border-radius: $border-radius-sm;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: $color-gray-400;
+    border-radius: $border-radius-sm;
+    border: 3px solid $color-gray-200;
+    
+    &:hover {
+      background: $color-gray-500;
+    }
+  }
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-unit * 2;
+  background-color: $color-white;
+  border-bottom: 2px solid $color-gray-300;
+  position: sticky;
+  top: 0;
+  z-index: $z-index-sticky;
+  
+  @include high-contrast-mode {
+    border-bottom-color: $color-black;
+    background-color: $color-white;
+  }
+  
+  @include respond-to('sm') {
+    padding: $spacing-unit * 3;
+  }
+}
+
+.berth-rows {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-unit * 2;
+  padding: $spacing-unit * 2;
+  
+  @include respond-to('sm') {
+    gap: $spacing-unit * 3;
+    padding: $spacing-unit * 3;
+  }
+}
+
+.berth-row {
+  display: grid;
+  grid-template-columns: [info] 150px [timeline] 1fr;
+  gap: $spacing-unit * 2;
+  min-height: $spacing-unit * 8;
+  background-color: $color-white;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-sm;
+  
+  @include respond-to('md') {
+    grid-template-columns: [info] 200px [timeline] 1fr;
+    min-height: $spacing-unit * 10;
+  }
+  
+  @include high-contrast-mode {
+    border: 2px solid $color-black;
+    box-shadow: none;
+  }
+}
+
+.berth-info {
+  padding: $spacing-unit * 2;
+  border-right: 1px solid $color-gray-300;
+  
+  @include high-contrast-mode {
+    border-right-color: $color-black;
+  }
+}
+
+.timeline-grid {
+  position: relative;
+  height: 100%;
+  @include vessel-timeline-grid(24, 'hourly');
+}
+
+.allocation-block {
+  position: absolute;
+  height: calc(100% - #{$spacing-unit * 2});
+  border-radius: $border-radius-md;
+  cursor: pointer;
+  transition: $transition-base;
+  min-width: 60px;
+  touch-action: manipulation;
+  user-select: none;
+  
+  @include optimize-animation;
+  @include hardware-accelerate;
+  
+  // Status-based styling
+  @each $status, $color in $status-colors {
+    &.status-#{$status} {
+      background-color: rgba($color, 0.8);
+      border: 2px solid $color;
+      
+      &:hover {
+        background-color: rgba($color, 0.9);
+      }
+      
+      @include high-contrast-mode {
+        background-color: $color-white;
+        border: 3px solid $color;
+      }
+    }
+  }
+  
+  // Enhanced touch targets for mobile
+  @include respond-to('sm') {
+    height: calc(100% - #{$spacing-unit * 3});
+  }
+  
+  // Focus state for accessibility
+  &:focus-visible {
+    outline: 3px solid $color-primary;
+    outline-offset: 2px;
+    
+    @include high-contrast-mode {
+      outline-color: $color-black;
+    }
+  }
+}
+
+// Time markers
+.time-marker {
+  position: absolute;
+  top: -$spacing-unit * 3;
+  transform: translateX(-50%);
+  font-size: $font-size-sm;
+  color: $color-gray-700;
+  white-space: nowrap;
+  
+  @include respond-to('md') {
+    font-size: $font-size-md;
+  }
+  
+  @include high-contrast-mode {
+    color: $color-black;
+    font-weight: $font-weight-medium;
+  }
+}
+
+// Current time indicator
+.current-time-indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: $color-accent;
+  z-index: 1;
+  pointer-events: none;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: -$spacing-unit;
+    left: 50%;
+    transform: translateX(-50%);
+    width: $spacing-unit;
+    height: $spacing-unit;
+    background-color: $color-accent;
+    border-radius: 50%;
+  }
+  
+  @include high-contrast-mode {
+    background-color: $color-black;
+    width: 3px;
+    
+    &::after {
+      background-color: $color-black;
+      border: 2px solid $color-white;
+    }
+  }
+}
