@@ -1,0 +1,234 @@
+// =============================================================================
+// VESSEL CALL MANAGEMENT SYSTEM - CLEARANCE COMPONENT STYLES
+// Version: 1.0.0
+// =============================================================================
+
+// Import core styles
+@use '../../../../assets/styles/variables' as *;
+@use '../../../../assets/styles/mixins' as *;
+
+// Function to calculate maritime-optimized spacing
+@function spacing($multiplier) {
+  @return $spacing-unit * $multiplier;
+}
+
+// Main clearance container with maritime optimizations
+.clearance-container {
+  padding: spacing(3);
+  background: var(--surface-color, $color-white);
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-md;
+  margin: spacing(2);
+
+  @include high-contrast-mode {
+    border: 2px solid $color-black;
+    box-shadow: none;
+  }
+
+  @include respond-to('xs') {
+    padding: spacing(2);
+    margin: spacing(1);
+  }
+
+  @include control-room-display {
+    padding: spacing(4);
+    font-size: $font-size-lg;
+  }
+}
+
+// Enhanced header section for outdoor visibility
+.clearance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: spacing(3);
+  
+  h2 {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: var(--text-high-contrast, $color-gray-900);
+    margin: 0;
+
+    @include high-contrast-mode {
+      color: $color-black;
+    }
+  }
+
+  .pending-count {
+    @include status-indicator('planned');
+    font-size: $font-size-md;
+  }
+}
+
+// Maritime-optimized status section
+.clearance-status {
+  display: flex;
+  align-items: center;
+  gap: spacing(2);
+  padding: spacing(2);
+  border-radius: $border-radius-md;
+  background: var(--status-background, $color-gray-100);
+  margin-bottom: spacing(3);
+
+  .status-icon {
+    width: spacing(3);
+    height: spacing(3);
+
+    @include high-contrast-mode {
+      border: 2px solid currentColor;
+    }
+  }
+
+  .status-text {
+    font-weight: $font-weight-medium;
+    color: var(--text-primary, $color-gray-900);
+  }
+}
+
+// Responsive clearance items container
+.clearance-items {
+  display: grid;
+  gap: spacing(3);
+  
+  @include respond-to('xs') {
+    grid-template-columns: 1fr;
+  }
+  
+  @include respond-to('md') {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @include respond-to('lg') {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .clearance-item {
+    @include vessel-card;
+    
+    &.completed {
+      border-left: 4px solid $color-success;
+    }
+    
+    &.pending {
+      border-left: 4px solid $color-warning;
+    }
+    
+    &.locked {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+  }
+}
+
+// Enhanced progress indicator with accessibility
+.progress-bar {
+  height: spacing(1.5);
+  border-radius: spacing(0.75);
+  background: var(--progress-background, $color-gray-200);
+  position: relative;
+  overflow: hidden;
+  margin: spacing(3) 0;
+
+  .progress-fill {
+    height: 100%;
+    background: $color-primary;
+    transition: width 0.3s ease;
+
+    @include optimize-animation;
+    
+    @include high-contrast-mode {
+      background: $color-black;
+      border: 1px solid $color-white;
+    }
+  }
+
+  @include respond-to('xs') {
+    height: spacing(2); // Larger on mobile for better touch targets
+  }
+}
+
+// Maritime-optimized action buttons
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: spacing(2);
+  margin-top: spacing(3);
+
+  button {
+    @include maritime-button;
+    min-width: spacing(15);
+
+    &.primary {
+      background: $color-primary;
+      color: $color-white;
+
+      &:hover {
+        background: darken($color-primary, 10%);
+      }
+
+      @include high-contrast-mode {
+        background: $color-black;
+        border: 2px solid $color-white;
+      }
+    }
+
+    &.secondary {
+      background: $color-gray-100;
+      color: $color-gray-900;
+
+      &:hover {
+        background: $color-gray-200;
+      }
+
+      @include high-contrast-mode {
+        background: $color-white;
+        border: 2px solid $color-black;
+        color: $color-black;
+      }
+    }
+  }
+
+  @include respond-to('xs') {
+    flex-direction: column;
+    
+    button {
+      width: 100%;
+    }
+  }
+}
+
+// Accessibility enhancements
+.screen-reader-text {
+  @include screen-reader-only;
+}
+
+// Document review section
+.document-review {
+  padding: spacing(2);
+  background: var(--review-background, $color-gray-50);
+  border-radius: $border-radius-md;
+  margin-top: spacing(2);
+
+  .document-list {
+    display: flex;
+    flex-direction: column;
+    gap: spacing(1);
+
+    .document-item {
+      display: flex;
+      align-items: center;
+      gap: spacing(1);
+      padding: spacing(1);
+      border-radius: $border-radius-sm;
+      background: $color-white;
+
+      @include high-contrast-mode {
+        border: 1px solid $color-black;
+      }
+
+      &:hover {
+        background: $color-gray-100;
+      }
+    }
+  }
+}
