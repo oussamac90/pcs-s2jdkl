@@ -1,0 +1,167 @@
+<div class="service-form-container maritime-theme" role="form" aria-label="Maritime Service Booking Form">
+  <!-- Loading Indicator -->
+  <mat-progress-spinner *ngIf="isLoading" 
+    mode="indeterminate" 
+    diameter="48"
+    role="progressbar"
+    aria-label="Loading service availability">
+  </mat-progress-spinner>
+
+  <!-- Form Header -->
+  <div class="form-header maritime-header">
+    <h1>Port Services Booking</h1>
+    <div class="service-rates" role="complementary">
+      <button mat-icon-button (click)="showRates()" aria-label="View service rates">
+        <mat-icon>attach_money</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Form -->
+  <form [formGroup]="serviceForm" (ngSubmit)="onSubmit()" class="service-form">
+    <!-- Vessel Information Section -->
+    <section class="form-section vessel-info" role="group" aria-label="Vessel Information">
+      <h2>Vessel Details</h2>
+      <div class="form-group">
+        <mat-form-field class="maritime-form-field" appearance="outline">
+          <mat-label>Vessel Name</mat-label>
+          <input matInput formControlName="vesselName" readonly aria-required="true">
+        </mat-form-field>
+      </div>
+      <div class="form-group">
+        <mat-form-field class="maritime-form-field" appearance="outline">
+          <mat-label>Call Number</mat-label>
+          <input matInput formControlName="callNumber" readonly aria-required="true">
+        </mat-form-field>
+      </div>
+    </section>
+
+    <!-- Service Selection Section -->
+    <section class="form-section service-selection" role="group" aria-label="Service Selection">
+      <h2>Select Services</h2>
+      <div class="form-group">
+        <mat-radio-group formControlName="serviceType" aria-label="Select service type" class="service-options">
+          <mat-radio-button *ngFor="let service of availableServices" 
+            [value]="service.value"
+            [attr.aria-label]="service.label"
+            class="service-option">
+            <div class="service-option-content">
+              <span class="service-name">{{service.label}}</span>
+              <span class="availability-indicator" [class.available]="service.isAvailable">
+                {{service.isAvailable ? 'Available' : 'Limited Availability'}}
+              </span>
+            </div>
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </section>
+
+    <!-- Service Details Section -->
+    <section class="form-section service-details" role="group" aria-label="Service Details" 
+      *ngIf="serviceForm.get('serviceType').value">
+      <h2>Service Details</h2>
+      
+      <!-- Pilotage Service Details -->
+      <div *ngIf="serviceForm.get('serviceType').value === 'PILOTAGE'" class="form-group">
+        <mat-form-field class="maritime-form-field datetime-picker" appearance="outline">
+          <mat-label>Service Date & Time</mat-label>
+          <input matInput [matDatetimepicker]="pilotDatePicker" 
+            formControlName="pilotDateTime"
+            [min]="minDateTime"
+            [max]="maxDateTime"
+            aria-required="true">
+          <mat-datepicker-toggle matSuffix [for]="pilotDatePicker"></mat-datepicker-toggle>
+          <mat-datetimepicker #pilotDatePicker></mat-datetimepicker>
+          <mat-error *ngIf="serviceForm.get('pilotDateTime').errors?.required">
+            Service date and time is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Tugboat Service Details -->
+      <div *ngIf="serviceForm.get('serviceType').value === 'TUGBOAT'" class="form-group">
+        <mat-form-field class="maritime-form-field" appearance="outline">
+          <mat-label>Number of Tugboats</mat-label>
+          <mat-select formControlName="tugboatCount" aria-required="true">
+            <mat-option *ngFor="let count of tugboatOptions" [value]="count">
+              {{count}} {{count === 1 ? 'Tugboat' : 'Tugboats'}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="maritime-form-field datetime-picker" appearance="outline">
+          <mat-label>Service Date & Time</mat-label>
+          <input matInput [matDatetimepicker]="tugDatePicker" 
+            formControlName="tugDateTime"
+            [min]="minDateTime"
+            [max]="maxDateTime"
+            aria-required="true">
+          <mat-datepicker-toggle matSuffix [for]="tugDatePicker"></mat-datepicker-toggle>
+          <mat-datetimepicker #tugDatePicker></mat-datetimepicker>
+        </mat-form-field>
+      </div>
+
+      <!-- Mooring Service Details -->
+      <div *ngIf="serviceForm.get('serviceType').value === 'MOORING'" class="form-group">
+        <mat-form-field class="maritime-form-field" appearance="outline">
+          <mat-label>Team Size</mat-label>
+          <mat-select formControlName="mooringTeamSize" aria-required="true">
+            <mat-option *ngFor="let size of mooringTeamOptions" [value]="size">
+              {{size}} Team Members
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="maritime-form-field datetime-picker" appearance="outline">
+          <mat-label>Service Date & Time</mat-label>
+          <input matInput [matDatetimepicker]="moorDatePicker" 
+            formControlName="moorDateTime"
+            [min]="minDateTime"
+            [max]="maxDateTime"
+            aria-required="true">
+          <mat-datepicker-toggle matSuffix [for]="moorDatePicker"></mat-datepicker-toggle>
+          <mat-datetimepicker #moorDatePicker></mat-datetimepicker>
+        </mat-form-field>
+      </div>
+    </section>
+
+    <!-- Cost Summary Section -->
+    <section class="form-section cost-summary" role="region" aria-label="Cost Summary">
+      <h2>Cost Summary</h2>
+      <div class="cost-details">
+        <div class="cost-row">
+          <span class="cost-label">Service Cost:</span>
+          <span class="cost-amount">{{serviceCost | currency}}</span>
+        </div>
+        <div class="cost-row" *ngIf="additionalCharges > 0">
+          <span class="cost-label">Additional Charges:</span>
+          <span class="cost-amount">{{additionalCharges | currency}}</span>
+        </div>
+        <div class="cost-row total">
+          <span class="cost-label">Total Estimated Cost:</span>
+          <span class="cost-amount">{{totalCost | currency}}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Form Actions -->
+    <div class="action-buttons">
+      <button mat-button type="button" 
+        class="secondary" 
+        (click)="onCancel()"
+        aria-label="Cancel booking">
+        Cancel
+      </button>
+      <button mat-raised-button 
+        color="primary" 
+        type="submit"
+        [disabled]="!serviceForm.valid || isSubmitting"
+        aria-label="Submit booking">
+        Book Service
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Accessibility Skip Link -->
+<a href="#main-content" class="skip-link" aria-label="Skip to main content">
+  Skip to main content
+</a>
