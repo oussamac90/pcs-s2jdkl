@@ -1,0 +1,83 @@
+<nav class="sidebar-container" role="navigation" aria-label="Main navigation"
+     [@sidebarState]="isExpanded ? 'expanded' : 'collapsed'"
+     [class.expanded]="isExpanded">
+
+  <!-- Sidebar Toggle Button -->
+  <button class="sidebar-toggle" 
+          (click)="toggleSidebar()" 
+          [attr.aria-expanded]="isExpanded"
+          aria-label="Toggle navigation menu"
+          matRipple>
+    <mat-icon aria-hidden="true">{{isExpanded ? 'menu_open' : 'menu'}}</mat-icon>
+  </button>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-container" aria-live="polite">
+    <mat-spinner diameter="24" aria-label="Loading navigation"></mat-spinner>
+  </div>
+
+  <!-- Navigation Menu -->
+  <ul class="nav-list" role="menubar" aria-orientation="vertical" [class.expanded]="isExpanded">
+    <li *ngFor="let item of navigationItems; trackBy: trackByFn"
+        class="nav-item"
+        role="none"
+        [class.active]="isActiveRoute(item.route)"
+        [class.has-children]="item.children?.length">
+
+      <!-- Main Navigation Item -->
+      <a [routerLink]="item.route"
+         role="menuitem"
+         [attr.aria-current]="isActiveRoute(item.route) ? 'page' : null"
+         [attr.aria-expanded]="item.children?.length ? (item.expanded ? 'true' : 'false') : null"
+         [attr.aria-label]="item.label"
+         matRipple
+         [matTooltip]="!isExpanded ? item.label : ''"
+         matTooltipPosition="right"
+         class="nav-link">
+        <mat-icon class="nav-icon" aria-hidden="true">{{item.icon}}</mat-icon>
+        <span class="nav-label" [class.hidden]="!isExpanded">{{item.label}}</span>
+        <mat-icon *ngIf="item.children?.length" 
+                  class="expand-icon" 
+                  aria-hidden="true"
+                  [class.rotated]="item.expanded">
+          chevron_right
+        </mat-icon>
+      </a>
+
+      <!-- Submenu Items -->
+      <ul *ngIf="item.children?.length" 
+          class="submenu"
+          role="menu"
+          [class.expanded]="item.expanded && isExpanded"
+          [@submenuState]="item.expanded ? 'expanded' : 'collapsed'">
+        <li *ngFor="let child of item.children" 
+            class="submenu-item"
+            role="none"
+            [class.active]="isActiveRoute(child.route)">
+          <a [routerLink]="child.route"
+             role="menuitem"
+             [attr.aria-current]="isActiveRoute(child.route) ? 'page' : null"
+             [attr.aria-label]="child.label"
+             matRipple
+             [matTooltip]="!isExpanded ? child.label : ''"
+             matTooltipPosition="right"
+             class="submenu-link">
+            <mat-icon class="submenu-icon" aria-hidden="true">{{child.icon}}</mat-icon>
+            <span class="submenu-label" [class.hidden]="!isExpanded">{{child.label}}</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+
+  <!-- Keyboard Navigation Instructions -->
+  <div class="keyboard-instructions" 
+       role="complementary" 
+       aria-label="Keyboard navigation instructions"
+       [class.expanded]="isExpanded">
+    <mat-icon aria-hidden="true">keyboard</mat-icon>
+    <span class="instruction-text" [class.hidden]="!isExpanded">
+      Use arrow keys to navigate, Enter to select, Esc to close submenus
+    </span>
+  </div>
+</nav>
