@@ -1,0 +1,227 @@
+// Import core design tokens and variables
+@use 'src/web/src/assets/styles/variables' as *;
+@use 'src/web/src/assets/styles/mixins' as *;
+
+// Root container for clearance workflow
+.clearance-workflow-container {
+  padding: $spacing-unit * 3;
+  background-color: $color-white;
+  border-radius: $border-radius-md;
+  min-height: 100vh;
+  box-shadow: $shadow-md;
+
+  @include respond-to('xs') {
+    padding: $spacing-unit * 2;
+  }
+
+  @include high-contrast-mode {
+    background-color: $color-white;
+    border: 2px solid $color-black;
+    box-shadow: none;
+  }
+}
+
+// Header section with vessel details
+.workflow-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-unit * 3;
+  
+  h2 {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-medium;
+    color: $color-gray-900;
+    margin: 0;
+
+    @include high-contrast-mode {
+      color: $color-black;
+    }
+  }
+
+  .pending-items {
+    display: flex;
+    align-items: center;
+    padding: $spacing-unit $spacing-unit * 2;
+    background-color: rgba(map-get($status-colors, 'planned'), 0.1);
+    border-radius: $border-radius-md;
+    font-weight: $font-weight-medium;
+
+    @include high-contrast-mode {
+      background-color: $color-white;
+      border: 2px solid $color-black;
+    }
+  }
+}
+
+// Individual clearance item
+.clearance-item {
+  display: flex;
+  align-items: center;
+  padding: $spacing-unit * 2.5;
+  border-bottom: 1px solid $color-gray-200;
+  min-height: 64px; // Ensure minimum touch target size
+
+  @include respond-to('xs') {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-unit;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .item-details {
+    flex: 1;
+    
+    .item-name {
+      font-weight: $font-weight-medium;
+      color: $color-gray-900;
+      margin-bottom: $spacing-unit;
+
+      @include high-contrast-mode {
+        color: $color-black;
+      }
+    }
+
+    .item-status {
+      font-size: $font-size-sm;
+      color: $color-gray-600;
+    }
+  }
+}
+
+// Status badge styles
+.status-badge {
+  padding: $spacing-unit $spacing-unit * 1.5;
+  border-radius: $border-radius-md;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  min-width: 80px;
+  text-align: center;
+
+  @each $status, $color in $status-colors {
+    &.status-#{$status} {
+      background-color: rgba($color, 0.1);
+      color: $color;
+
+      @include high-contrast-mode {
+        background-color: $color-white;
+        border: 2px solid $color;
+        color: $color-black;
+      }
+    }
+  }
+}
+
+// Progress tracking bar
+.workflow-progress {
+  margin: $spacing-unit * 3 0;
+  height: 8px;
+  border-radius: $border-radius-md;
+  background-color: $color-gray-200;
+  overflow: hidden;
+
+  .progress-bar {
+    height: 100%;
+    background-color: $color-primary;
+    transition: width 0.3s ease;
+
+    @include optimize-animation;
+
+    @include high-contrast-mode {
+      background-color: $color-black;
+    }
+  }
+}
+
+// Action buttons
+.clearance-actions {
+  display: flex;
+  gap: $spacing-unit * 2;
+  margin-top: $spacing-unit * 3;
+
+  @include respond-to('xs') {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  button {
+    @include maritime-button;
+    min-width: 120px;
+
+    @include respond-to('xs') {
+      width: 100%;
+    }
+
+    &.primary {
+      background-color: $color-primary;
+      color: $color-white;
+
+      &:hover:not(:disabled) {
+        background-color: darken($color-primary, 10%);
+      }
+
+      @include high-contrast-mode {
+        background-color: $color-black;
+        color: $color-white;
+      }
+    }
+
+    &.secondary {
+      background-color: $color-gray-100;
+      color: $color-gray-900;
+
+      &:hover:not(:disabled) {
+        background-color: $color-gray-200;
+      }
+
+      @include high-contrast-mode {
+        background-color: $color-white;
+        border: 2px solid $color-black;
+        color: $color-black;
+      }
+    }
+  }
+}
+
+// Document review section
+.document-review {
+  margin-top: $spacing-unit * 2;
+  padding: $spacing-unit * 2;
+  background-color: $color-gray-100;
+  border-radius: $border-radius-md;
+
+  @include high-contrast-mode {
+    background-color: $color-white;
+    border: 2px solid $color-black;
+  }
+
+  .document-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-unit;
+
+    .document-item {
+      display: flex;
+      align-items: center;
+      gap: $spacing-unit;
+      padding: $spacing-unit;
+      background-color: $color-white;
+      border-radius: $border-radius-sm;
+
+      @include high-contrast-mode {
+        border: 1px solid $color-black;
+      }
+
+      .document-icon {
+        color: $color-primary;
+
+        @include high-contrast-mode {
+          color: $color-black;
+        }
+      }
+    }
+  }
+}
