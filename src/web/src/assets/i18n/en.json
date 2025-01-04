@@ -1,0 +1,202 @@
+{
+  "common": {
+    "actions": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "submit": "Submit",
+      "confirm": "Confirm",
+      "back": "Back",
+      "next": "Next",
+      "search": "Search",
+      "filter": "Filter",
+      "clear": "Clear",
+      "refresh": "Refresh",
+      "aria_labels": {
+        "save_button": "Save changes",
+        "cancel_button": "Cancel and discard changes",
+        "edit_button": "Edit current item",
+        "delete_button": "Delete current item",
+        "search_input": "Search within current view",
+        "filter_button": "Open filter options"
+      }
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "error": "Error",
+      "screen_reader": {
+        "active_status": "Currently active",
+        "pending_status": "Awaiting action",
+        "error_status": "Error occurred"
+      }
+    },
+    "validation": {
+      "required": "This field is required",
+      "invalid_format": "Invalid format",
+      "min_length": "Minimum length not met",
+      "max_length": "Maximum length exceeded",
+      "invalid_date": "Invalid date",
+      "aria_alerts": {
+        "form_error": "Form contains errors. Please review and correct.",
+        "field_error": "Error in field: {{fieldName}}"
+      }
+    },
+    "notifications": {
+      "success": "Operation completed successfully",
+      "error": "An error occurred",
+      "warning": "Warning",
+      "info": "Information",
+      "aria_labels": {
+        "notification": "{{type}} notification: {{message}}"
+      }
+    }
+  },
+  "header": {
+    "app_name": "Port VMS",
+    "menu": {
+      "toggle": "Toggle navigation menu",
+      "dashboard": "Dashboard",
+      "vessel_calls": "Vessel Calls",
+      "berth_management": "Berth Management",
+      "service_booking": "Service Booking",
+      "clearance": "Clearance",
+      "settings": "Settings",
+      "profile": "Profile",
+      "logout": "Logout",
+      "aria_labels": {
+        "menu_button": "Toggle main navigation menu",
+        "nav_item": "Navigate to {{pageName}}",
+        "user_menu": "Open user menu"
+      }
+    }
+  },
+  "vessel_calls": {
+    "title": "Vessel Calls Management",
+    "new_call": "New Vessel Call",
+    "table": {
+      "vessel_name": "Vessel Name",
+      "imo_number": "IMO Number",
+      "call_sign": "Call Sign",
+      "status": "Status",
+      "eta": "ETA",
+      "etd": "ETD",
+      "actions": "Actions",
+      "aria_labels": {
+        "sort_column": "Sort by {{columnName}}",
+        "row_select": "Select vessel call for {{vesselName}}"
+      }
+    },
+    "form": {
+      "vessel_details": "Vessel Details",
+      "schedule": "Schedule Information",
+      "cargo": "Cargo Information",
+      "aria_labels": {
+        "form_section": "{{sectionName}} input section",
+        "date_picker": "Select {{dateType}} date and time"
+      }
+    },
+    "status": {
+      "planned": "Planned",
+      "arrived": "Arrived",
+      "at_berth": "At Berth",
+      "departed": "Departed",
+      "cancelled": "Cancelled",
+      "screen_reader": {
+        "status_change": "Vessel status changed to {{status}}"
+      }
+    }
+  },
+  "berth_management": {
+    "title": "Berth Management",
+    "timeline": {
+      "title": "Berth Timeline",
+      "navigation": {
+        "zoom_in": "Zoom in timeline",
+        "zoom_out": "Zoom out timeline",
+        "pan_left": "Pan timeline left",
+        "pan_right": "Pan timeline right"
+      },
+      "aria_labels": {
+        "timeline_control": "Timeline navigation controls",
+        "berth_slot": "Berth {{berthNumber}} - {{status}}",
+        "vessel_allocation": "{{vesselName}} allocated from {{startTime}} to {{endTime}}"
+      }
+    },
+    "allocation": {
+      "title": "Berth Allocation",
+      "conflict": "Allocation Conflict Detected",
+      "success": "Berth Successfully Allocated",
+      "screen_reader": {
+        "conflict_alert": "Conflict detected with existing allocation",
+        "success_message": "Berth {{berthNumber}} allocated to {{vesselName}}"
+      }
+    }
+  },
+  "service_booking": {
+    "title": "Service Booking",
+    "services": {
+      "pilotage": "Pilotage",
+      "towage": "Towage",
+      "mooring": "Mooring",
+      "waste": "Waste Collection",
+      "bunker": "Bunkering"
+    },
+    "form": {
+      "service_type": "Service Type",
+      "date_time": "Date and Time",
+      "requirements": "Special Requirements",
+      "aria_labels": {
+        "service_select": "Select required port services",
+        "datetime_picker": "Select service date and time"
+      }
+    }
+  },
+  "clearance": {
+    "title": "Vessel Clearance",
+    "documents": {
+      "customs": "Customs Declaration",
+      "immigration": "Immigration Clearance",
+      "port_authority": "Port Authority Approval",
+      "health": "Health Declaration"
+    },
+    "status": {
+      "pending": "Pending Review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "screen_reader": {
+        "doc_status": "Document {{docType}} status: {{status}}"
+      }
+    }
+  },
+  "accessibility": {
+    "skip_links": {
+      "main_content": "Skip to main content",
+      "navigation": "Skip to navigation",
+      "search": "Skip to search"
+    },
+    "aria_live": {
+      "data_loading": "Loading data, please wait",
+      "data_updated": "Data has been updated",
+      "action_success": "Action completed successfully",
+      "action_error": "Error occurred during action"
+    },
+    "screen_reader": {
+      "table_summary": "Table showing {{itemType}} with {{rowCount}} rows",
+      "modal_open": "Dialog window opened",
+      "modal_close": "Dialog window closed",
+      "loading_state": "Content is loading",
+      "page_title": "Current page: {{pageTitle}}",
+      "required_field": "Required field"
+    },
+    "keyboard_shortcuts": {
+      "open_menu": "Press M to open main menu",
+      "close_dialog": "Press Escape to close dialog",
+      "save_form": "Press Control + S to save form"
+    }
+  }
+}
