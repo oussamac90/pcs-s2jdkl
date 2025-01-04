@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cache
+  namespace: vcms
+  labels:
+    app: redis
+    component: cache
+    tier: backend
+    part-of: vcms
+  annotations:
+    # Enable Prometheus metrics scraping
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9121"
+
+spec:
+  # Internal cluster service type for security
+  type: ClusterIP
+  
+  # Define ports for Redis and metrics
+  ports:
+    # Main Redis cache port
+    - port: 6379
+      targetPort: 6379
+      protocol: TCP
+      name: redis
+    
+    # Prometheus metrics exporter port
+    - port: 9121
+      targetPort: 9121
+      protocol: TCP
+      name: metrics
+  
+  # Pod selector for Redis cache instances
+  selector:
+    app: redis
+    component: cache
+  
+  # Disable session affinity for better load distribution
+  sessionAffinity: None
