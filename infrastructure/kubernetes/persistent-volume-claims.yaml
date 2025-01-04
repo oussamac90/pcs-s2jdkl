@@ -1,0 +1,48 @@
+# Kubernetes version: v1.24+
+# Purpose: Define persistent volume claims for Redis cache and application logs
+# Storage Class: Premium SSD with guaranteed IOPS and throughput
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-data-pvc
+  namespace: vcms
+  labels:
+    app: vcms
+    component: redis
+    tier: cache
+    environment: production
+  annotations:
+    storage.kubernetes.io/storage-provisioner: "kubernetes.io/azure-disk"
+    volume.beta.kubernetes.io/storage-class: "vcms-premium-ssd"
+    backup.velero.io/backup-volumes: "redis-data"
+spec:
+  accessModes:
+    - ReadWriteOnce  # Ensures single node access for data consistency
+  storageClassName: vcms-premium-ssd
+  resources:
+    requests:
+      storage: 50Gi  # Provides 3500 IOPS and 200MB/s throughput
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backend-logs-pvc
+  namespace: vcms
+  labels:
+    app: vcms
+    component: backend
+    tier: application
+    environment: production
+  annotations:
+    storage.kubernetes.io/storage-provisioner: "kubernetes.io/azure-disk"
+    volume.beta.kubernetes.io/storage-class: "vcms-premium-ssd"
+    backup.velero.io/backup-volumes: "backend-logs"
+    retention.policy: "30-days-online-90-days-archive"
+spec:
+  accessModes:
+    - ReadWriteOnce  # Ensures single node access for data consistency
+  storageClassName: vcms-premium-ssd
+  resources:
+    requests:
+      storage: 20Gi  # Provides 2400 IOPS and 150MB/s throughput
