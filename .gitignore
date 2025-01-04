@@ -1,0 +1,87 @@
+# Build and Compiled Output
+**/build/
+**/dist/
+**/out/
+**/target/
+**/.gradle/
+**/.angular/
+**/bin/
+**/.sass-cache/
+**/.tsbuildinfo
+**/generated/
+
+# Dependencies
+**/node_modules/
+**/vendor/
+**/.pnpm-store/
+**/yarn.lock
+**/package-lock.json
+**/pnpm-lock.yaml
+
+# IDE and Editor Files
+**/.idea/
+**/.vscode/
+**/.eclipse/
+**/.project
+**/.classpath
+**/.settings/
+**/.factorypath
+*.iml
+*.iws
+*.ipr
+*.sublime-*
+*.swp
+*.swo
+**/.metals/
+**/.bloop/
+
+# Logs and Reports
+**/logs/
+**/*.log
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/test-output/
+**/coverage/
+**/reports/
+**/junit/
+**/.nyc_output/
+
+# Configuration and Secrets
+**/.env
+**/.env.*
+**/application-*.yml
+**/application-*.properties
+**/secrets.yaml
+**/secrets.yml
+**/*.pem
+**/*.key
+**/*.keystore
+**/*.jks
+**/*.p12
+**/*.pfx
+**/terraform.tfvars
+**/*.tfstate
+**/*.tfstate.*
+**/.terraform/
+**/azure.json
+**/credentials.json
+**/service-account.json
+
+# System Files
+**/.DS_Store
+**/Thumbs.db
+**/*.swp
+**/*~
+**/temp/
+**/tmp/
+**/.directory
+**/.fuse_hidden*
+**/.nfs*
+
+# Exceptions - Files that should be included despite matching above patterns
+!**/gradle-wrapper.jar
+!**/gradle-wrapper.properties
+!**/.gitkeep
+!**/application-example.yml
+!.vscode/extensions.json
