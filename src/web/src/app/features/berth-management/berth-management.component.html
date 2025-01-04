@@ -1,0 +1,194 @@
+<div class="berth-management-container" role="main">
+  <!-- Header Section -->
+  <header class="berth-management-header">
+    <div class="header-title">
+      <h1 class="mat-h1" role="heading" aria-level="1">Berth Planning Board</h1>
+      <button mat-icon-button
+              aria-label="View help information"
+              matTooltip="View berth planning guide"
+              class="help-button">
+        <mat-icon>help_outline</mat-icon>
+      </button>
+    </div>
+
+    <!-- Loading and Error States -->
+    <div class="status-indicators" *ngIf="loading$ | async">
+      <mat-progress-bar mode="indeterminate" aria-label="Loading berth allocations"></mat-progress-bar>
+    </div>
+    <div class="error-alert" *ngIf="error$ | async as error" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{error}}</span>
+    </div>
+  </header>
+
+  <!-- Timeline Controls -->
+  <div class="timeline-controls" role="toolbar" aria-label="Timeline controls">
+    <div class="date-selection">
+      <mat-form-field appearance="outline">
+        <mat-label>Select Date</mat-label>
+        <input matInput [matDatepicker]="picker" 
+               [formControl]="dateControl"
+               (dateChange)="onDateChange($event)"
+               aria-label="Select date for timeline view">
+        <mat-datepicker-toggle matSuffix [for]="picker" aria-label="Open date picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <div class="action-buttons">
+      <button mat-raised-button 
+              color="primary"
+              aria-label="Create new berth allocation"
+              (click)="onNewAllocation()">
+        <mat-icon>add</mat-icon>
+        New Allocation
+      </button>
+
+      <button mat-button 
+              [matMenuTriggerFor]="exportMenu"
+              aria-label="Export timeline data">
+        <mat-icon>download</mat-icon>
+        Export
+      </button>
+      <mat-menu #exportMenu="matMenu">
+        <button mat-menu-item (click)="exportData('pdf')">
+          <mat-icon>picture_as_pdf</mat-icon>
+          Export as PDF
+        </button>
+        <button mat-menu-item (click)="exportData('excel')">
+          <mat-icon>table_chart</mat-icon>
+          Export as Excel
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+
+  <!-- Timeline View -->
+  <div class="timeline-container" role="region" aria-label="Berth allocation timeline">
+    <app-berth-timeline
+      [berthAllocations]="berthAllocations$ | async"
+      [selectedDate]="selectedDate"
+      (allocationDrop)="onAllocationDrop($event)"
+      aria-label="Interactive berth timeline">
+    </app-berth-timeline>
+  </div>
+
+  <!-- Timeline Legend -->
+  <div class="timeline-legend" role="complementary" aria-label="Timeline status legend">
+    <div class="legend-item">
+      <div class="legend-color occupied"></div>
+      <span>Occupied</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color scheduled"></div>
+      <span>Scheduled</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color conflict"></div>
+      <span>Conflict</span>
+    </div>
+  </div>
+</div>
+
+<!-- Responsive Styles -->
+<style>
+  .berth-management-container {
+    padding: 1rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .berth-management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .timeline-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .timeline-container {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  .timeline-legend {
+    display: flex;
+    gap: 2rem;
+    padding: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+  }
+
+  .legend-color.occupied { background-color: #1976D2; }
+  .legend-color.scheduled { background-color: #7986CB; }
+  .legend-color.conflict { background-color: #F44336; }
+
+  /* Responsive breakpoints */
+  @media (max-width: 768px) {
+    .timeline-controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .action-buttons {
+      justify-content: stretch;
+    }
+
+    .timeline-legend {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .timeline-controls {
+      flex-wrap: wrap;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    .berth-management-container {
+      padding: 2rem;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (forced-colors: active) {
+    .legend-color {
+      border: 2px solid currentColor;
+    }
+  }
+</style>
