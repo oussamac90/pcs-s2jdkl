@@ -1,0 +1,113 @@
+name: Release Management
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Type of version bump'
+        required: true
+        type: choice
+        default: 'patch'
+        options:
+          - major
+          - minor
+          - patch
+  push:
+    tags:
+      - 'v*'
+
+env:
+  REGISTRY: ${{ secrets.ACR_REGISTRY }}
+  REGISTRY_USERNAME: ${{ secrets.ACR_USERNAME }}
+  REGISTRY_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+
+jobs:
+  release:
+    name: Create and Publish Release
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+    concurrency:
+      group: release
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Generate semantic version
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          release_branches: main
+          default_bump: ${{ github.event.inputs.version_type || 'patch' }}
+          
+      - name: Parse CHANGELOG
+        id: changelog
+        run: |
+          CHANGELOG_CONTENT=$(sed -n "/## \[${RELEASE_VERSION/v/}\]/,/## \[/p" CHANGELOG.md | sed '$d')
+          echo "CHANGELOG_CONTENT<<EOF" >> $GITHUB_ENV
+          echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+        env:
+          RELEASE_VERSION: ${{ steps.tag_version.outputs.new_tag }}
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          release_name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ env.CHANGELOG_CONTENT }}
+          draft: false
+          prerelease: false
+
+      - name: Login to Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.REGISTRY }}
+          username: ${{ env.REGISTRY_USERNAME }}
+          password: ${{ env.REGISTRY_PASSWORD }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build_artifacts
+          path: artifacts
+
+      - name: Tag and push backend container
+        run: |
+          VERSION=${{ steps.tag_version.outputs.new_tag }}
+          docker pull ${{ env.REGISTRY }}/vcms/backend:latest
+          docker tag ${{ env.REGISTRY }}/vcms/backend:latest ${{ env.REGISTRY }}/vcms/backend:${VERSION}
+          docker push ${{ env.REGISTRY }}/vcms/backend:${VERSION}
+
+      - name: Tag and push frontend container
+        run: |
+          VERSION=${{ steps.tag_version.outputs.new_tag }}
+          docker pull ${{ env.REGISTRY }}/vcms/frontend:latest
+          docker tag ${{ env.REGISTRY }}/vcms/frontend:latest ${{ env.REGISTRY }}/vcms/frontend:${VERSION}
+          docker push ${{ env.REGISTRY }}/vcms/frontend:${VERSION}
+
+      - name: Verify container tags
+        run: |
+          VERSION=${{ steps.tag_version.outputs.new_tag }}
+          docker manifest inspect ${{ env.REGISTRY }}/vcms/backend:${VERSION}
+          docker manifest inspect ${{ env.REGISTRY }}/vcms/frontend:${VERSION}
+
+      - name: Trigger deployment
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: trigger-deployment
+          client-payload: '{"version": "${{ steps.tag_version.outputs.new_tag }}", "environment": "production"}'
+
+      - name: Update deployment status
+        run: |
+          echo "Release ${{ steps.tag_version.outputs.new_tag }} has been created and deployment triggered"
+          echo "Container images tagged and pushed to ACR"
+          echo "Deployment workflow triggered for production environment"
