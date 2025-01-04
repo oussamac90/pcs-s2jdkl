@@ -1,0 +1,77 @@
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Build outputs
+dist/
+build/
+.angular/
+coverage/
+
+# Test files
+*.spec.ts
+e2e/
+karma.conf.ts
+tsconfig.spec.json
+test.ts
+jest.config.js
+
+# Development configurations
+.env*
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE configurations
+.vscode/
+.idea/
+*.sublime-*
+*.swp
+*.swo
+
+# Version control
+.git/
+.gitignore
+.gitattributes
+
+# Sensitive files
+*secret*
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+
+# Documentation
+*.md
+LICENSE
+CHANGELOG
+AUTHORS
+
+# Logs and debugging
+*.log
+debug/
+logs/
+
+# Temporary files
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+*.bak
+
+# Project specific
+src/environments/*.ts
+!src/environments/environment.prod.ts
+
+# Package management
+package-lock.json
+yarn.lock
+
+# Configuration files not needed in production
+.editorconfig
+.prettierrc
+.eslintrc
+.browserslistrc
