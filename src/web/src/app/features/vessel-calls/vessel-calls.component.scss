@@ -1,0 +1,196 @@
+// Import core design tokens and maritime-specific variables
+@use '../../../../assets/styles/variables' as *;
+@use '../../../../assets/styles/mixins' as *;
+
+// Root container for vessel calls component
+.vessel-calls-container {
+  padding: spacing(3);
+  width: 100%;
+  max-width: var(--container-max-width);
+  min-height: 100vh;
+  background-color: var(--surface-color);
+  margin: 0 auto;
+
+  @include respond-to('xs') {
+    padding: spacing(2);
+  }
+
+  @include respond-to('lg') {
+    padding: spacing(4);
+  }
+}
+
+// Enhanced vessel card component
+.vessel-card {
+  @include vessel-card;
+  margin-bottom: spacing(2);
+  min-height: var(--vessel-card-min-height);
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  @include focus-visible;
+
+  // Enhanced touch targets for mobile
+  @include respond-to('xs') {
+    margin-bottom: spacing(3);
+  }
+
+  // High contrast mode adjustments
+  @include high-contrast-mode {
+    border-width: 2px;
+  }
+}
+
+// Status indicator with enhanced visibility
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: spacing(1);
+  padding: spacing(1) spacing(2);
+  border-radius: $border-radius-md;
+  font-weight: $font-weight-medium;
+
+  @each $status, $color in $status-colors {
+    &--#{$status} {
+      background-color: rgba($color, 0.1);
+      color: $color;
+
+      &::before {
+        content: '';
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: currentColor;
+      }
+    }
+  }
+
+  // Enhanced visibility for outdoor conditions
+  @media (prefers-contrast: high) {
+    border: 2px solid currentColor;
+  }
+}
+
+// Form section with enhanced accessibility
+.form-section {
+  margin-bottom: spacing(3);
+  padding: spacing(2);
+  background-color: var(--form-background);
+  border-radius: $border-radius-lg;
+  max-width: var(--form-max-width);
+  margin-left: auto;
+  margin-right: auto;
+
+  @include respond-to('md') {
+    padding: spacing(3);
+  }
+
+  // Form grid layout
+  .form-grid {
+    display: grid;
+    gap: spacing(2);
+
+    @include respond-to('sm') {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @include respond-to('lg') {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+}
+
+// Enhanced input fields for maritime environment
+.form-control {
+  width: 100%;
+  padding: spacing(1.5);
+  border: 1px solid $color-gray-300;
+  border-radius: $border-radius-md;
+  background-color: $color-white;
+  transition: border-color 0.2s ease;
+
+  &:focus {
+    border-color: $color-primary;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.2);
+  }
+
+  // Larger touch targets for mobile
+  @include respond-to('xs') {
+    padding: spacing(2);
+  }
+
+  // High contrast mode
+  @include high-contrast-mode {
+    border-width: 2px;
+  }
+}
+
+// Action buttons with maritime considerations
+.action-button {
+  @include maritime-button;
+  background-color: $color-primary;
+  color: $color-white;
+
+  &--secondary {
+    background-color: $color-secondary;
+  }
+
+  &--danger {
+    background-color: map-get($status-colors, 'cancelled');
+  }
+}
+
+// Responsive table layout
+.vessel-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: spacing(3);
+
+  th, td {
+    padding: spacing(2);
+    text-align: left;
+    border-bottom: 1px solid $color-gray-300;
+  }
+
+  th {
+    font-weight: $font-weight-medium;
+    background-color: $color-gray-100;
+  }
+
+  // Responsive adjustments
+  @include respond-to('xs') {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+// Loading state with reduced motion consideration
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+
+  @include optimize-animation;
+}
+
+// Screen reader only elements
+.sr-only {
+  @include screen-reader-only;
+}
+
+// CSS Custom Properties
+:root {
+  --vessel-card-min-height: 200px;
+  --form-max-width: 800px;
+  --surface-color: #{$color-white};
+  --form-background: #{$color-gray-100};
+  --card-elevation: #{$shadow-md};
+  --container-max-width: 1440px;
+}
