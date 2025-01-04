@@ -1,0 +1,188 @@
+// =============================================================================
+// VESSEL CALL MANAGEMENT SYSTEM - MAIN STYLESHEET
+// Version: 1.0.0
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// External Dependencies
+// -----------------------------------------------------------------------------
+
+// normalize.css v8.0.1
+@import "~normalize.css";
+
+// Angular Material Theme v16.0.0
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+
+// -----------------------------------------------------------------------------
+// Internal Dependencies
+// -----------------------------------------------------------------------------
+
+@use "variables" as *;
+@use "mixins" as *;
+@use "typography" as *;
+
+// -----------------------------------------------------------------------------
+// Global Styles
+// -----------------------------------------------------------------------------
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: $font-size-base;
+  line-height: $line-height-base;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+body {
+  font-family: $font-family-primary;
+  color: $color-gray-900;
+  background-color: $color-gray-100;
+  min-height: 100vh;
+  overflow-x: hidden;
+  
+  @include high-contrast-mode {
+    background-color: $color-white;
+    color: $color-black;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Maritime-Specific Container Classes
+// -----------------------------------------------------------------------------
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--maritime-background, $color-white);
+  color-scheme: light dark;
+
+  @include respond-to('lg') {
+    padding: spacing(2);
+  }
+
+  @include control-room-display {
+    font-size: $font-size-lg;
+  }
+}
+
+.content-wrapper {
+  flex: 1;
+  width: 100%;
+  max-width: map-get($container-max-widths, 'xl');
+  margin: 0 auto;
+  padding: spacing(2);
+  
+  @include respond-to('md') {
+    padding: spacing(3);
+  }
+  
+  @include respond-to('lg') {
+    padding: spacing(4);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Maritime Display Optimizations
+// -----------------------------------------------------------------------------
+
+.maritime-display {
+  // Enhanced contrast for outdoor visibility
+  --maritime-background: #{$color-white};
+  --maritime-text: #{$color-gray-900};
+  --maritime-backdrop: blur(8px);
+  
+  @media (prefers-color-scheme: dark) {
+    --maritime-background: #{$color-gray-900};
+    --maritime-text: #{$color-white};
+  }
+  
+  @include high-contrast-mode {
+    --maritime-background: #{$color-white};
+    --maritime-text: #{$color-black};
+    --maritime-backdrop: none;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Accessibility Enhancements
+// -----------------------------------------------------------------------------
+
+// Focus Indicators
+:focus-visible {
+  outline: 3px solid $color-primary;
+  outline-offset: 2px;
+  
+  @include high-contrast-mode {
+    outline-color: $color-black;
+  }
+}
+
+// Touch Targets
+@include respond-to('xs') {
+  button,
+  [role="button"],
+  input,
+  select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+// High Contrast Mode
+@include high-contrast-mode {
+  img, svg {
+    border: 1px solid currentColor;
+  }
+  
+  button,
+  [role="button"] {
+    border: 2px solid currentColor;
+  }
+}
+
+// Reduced Motion
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// Text Resizing Support
+@media screen and (max-width: $breakpoint-md) {
+  html {
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Print Styles
+// -----------------------------------------------------------------------------
+
+@media print {
+  body {
+    background: $color-white;
+  }
+  
+  .app-container {
+    padding: 0;
+  }
+  
+  .content-wrapper {
+    max-width: none;
+    padding: spacing(2);
+  }
+  
+  @page {
+    margin: 2cm;
+  }
+}
