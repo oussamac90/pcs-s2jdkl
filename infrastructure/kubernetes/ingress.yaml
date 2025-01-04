@@ -1,0 +1,70 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vcms-ingress
+  namespace: vcms
+  annotations:
+    # Ingress Class Configuration
+    kubernetes.io/ingress.class: "nginx"
+    
+    # SSL/TLS Configuration
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.3"
+    nginx.ingress.kubernetes.io/ssl-ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    
+    # Security Headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: DENY";
+      more_set_headers "X-Content-Type-Options: nosniff";
+      more_set_headers "X-XSS-Protection: 1; mode=block";
+      more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains";
+    
+    # WAF and Security Controls
+    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+    nginx.ingress.kubernetes.io/enable-owasp-core-rules: "true"
+    
+    # Performance Tuning
+    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
+    nginx.ingress.kubernetes.io/keepalive: "75"
+    nginx.ingress.kubernetes.io/keepalive-requests: "100"
+    
+    # Monitoring Configuration
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "10254"
+    
+    # Maritime-specific Optimizations
+    nginx.ingress.kubernetes.io/client-max-body-size: "8m"  # Optimized for maritime document uploads
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "180" # Extended timeout for maritime operations
+    nginx.ingress.kubernetes.io/limit-rps: "100"            # Rate limiting for API protection
+
+spec:
+  tls:
+    - hosts:
+        - vcms.example.com
+      secretName: vcms-tls-cert
+  
+  rules:
+    - host: vcms.example.com
+      http:
+        paths:
+          # Backend API Routes
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: vcms-backend
+                port:
+                  number: 8080
+          
+          # Frontend Routes
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vcms-frontend
+                port:
+                  number: 80
