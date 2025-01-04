@@ -1,0 +1,123 @@
+<div class="berth-timeline-container" 
+     role="region" 
+     aria-label="Interactive berth allocation timeline"
+     data-offline-capable="true"
+     data-high-contrast="auto"
+     data-touch-optimized="true">
+
+  <!-- Timeline Controls -->
+  <div class="timeline-controls" role="toolbar" aria-label="Timeline controls">
+    <button class="maritime-button" 
+            (click)="zoomIn()"
+            aria-label="Zoom in timeline">
+      <i class="fas fa-plus" aria-hidden="true"></i>
+    </button>
+    <button class="maritime-button" 
+            (click)="zoomOut()"
+            aria-label="Zoom out timeline">
+      <i class="fas fa-minus" aria-hidden="true"></i>
+    </button>
+    <button class="maritime-button" 
+            (click)="resetView()"
+            aria-label="Reset timeline view">
+      <i class="fas fa-sync" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <!-- Timeline Header -->
+  <div class="timeline-header" role="row" aria-label="Timeline hours">
+    <div class="time-marker" 
+         *ngFor="let hour of timeSlots; trackBy: trackByHour"
+         [style.left.%]="(hour / 24) * 100">
+      <span class="hour-label">{{formatHour(hour)}}</span>
+      <span class="timezone-indicator" aria-label="Timezone">{{timezone}}</span>
+    </div>
+  </div>
+
+  <!-- Berth Rows -->
+  <div class="berth-rows" role="grid">
+    <div class="berth-row" 
+         *ngFor="let berth of berths; trackBy: trackByBerthId"
+         [attr.data-berth-id]="berth.id"
+         role="row">
+      
+      <!-- Berth Information -->
+      <div class="berth-info" role="gridcell">
+        <h3 class="berth-name">{{berth.name}}</h3>
+        <div class="berth-details">
+          <span class="berth-length">{{berth.length}}m</span>
+          <span class="berth-depth">{{berth.depth}}m</span>
+        </div>
+        <div class="berth-status" 
+             [ngClass]="getBerthStatusClass(berth)"
+             role="status">
+          {{getBerthStatusText(berth)}}
+        </div>
+      </div>
+
+      <!-- Timeline Grid -->
+      <div class="timeline-grid" role="gridcell">
+        <!-- Allocation Blocks -->
+        <div class="allocation-block"
+             *ngFor="let allocation of getAllocationsForBerth(berth.id) | async; trackBy: trackByAllocationId"
+             [ngClass]="getAllocationClasses(allocation)"
+             [style.left.%]="calculateLeftPosition(allocation)"
+             [style.width.%]="calculateWidth(allocation)"
+             [attr.data-vessel-id]="allocation.vesselId"
+             [attr.aria-label]="getAccessibleAllocationLabel(allocation)"
+             role="button"
+             tabindex="0"
+             (click)="onAllocationClick(allocation)"
+             (keydown.enter)="onAllocationClick(allocation)"
+             (keydown.space)="onAllocationClick(allocation)">
+          
+          <div class="allocation-content">
+            <span class="vessel-name">{{allocation.vesselName}}</span>
+            <span class="allocation-time">
+              {{formatTime(allocation.startTime)}} - {{formatTime(allocation.endTime)}}
+            </span>
+          </div>
+
+          <!-- Status Indicators -->
+          <div class="status-indicators" aria-hidden="true">
+            <span class="weather-indicator" 
+                  *ngIf="hasWeatherAlert(allocation)"
+                  [title]="getWeatherAlertText(allocation)">
+              <i class="fas fa-cloud-showers-heavy"></i>
+            </span>
+            <span class="conflict-indicator" 
+                  *ngIf="hasConflict(allocation)"
+                  [title]="getConflictText(allocation)">
+              <i class="fas fa-exclamation-triangle"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- Current Time Indicator -->
+        <div class="current-time-indicator"
+             role="presentation"
+             [style.left.%]="getCurrentTimePosition()"
+             aria-hidden="true">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emergency Mode Overlay -->
+  <div class="emergency-mode-overlay" 
+       *ngIf="isEmergencyMode"
+       role="alert"
+       aria-live="assertive">
+    <div class="emergency-content">
+      <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+      <span>Emergency Mode Active</span>
+    </div>
+  </div>
+
+  <!-- Screen Reader Announcements -->
+  <div class="screen-reader-announcements" 
+       aria-live="polite" 
+       [attr.aria-atomic]="true">
+    <span *ngIf="lastAnnouncement">{{lastAnnouncement}}</span>
+  </div>
+</div>
