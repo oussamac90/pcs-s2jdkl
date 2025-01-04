@@ -1,0 +1,75 @@
+.git
+.gitignore
+
+# Gradle build files and cache
+.gradle
+build/
+out/
+
+# Compiled files
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# Logs and temporary files
+*.log
+**/tmp/
+.DS_Store
+
+# IDE files
+.idea/
+*.iml
+.settings/
+.project
+.classpath
+.vscode/
+
+# Test files and directories
+src/test/
+**/test/
+**/*Test.java
+**/*Tests.java
+**/*IT.java
+
+# Local configuration and secrets
+**/application-local.yml
+**/application-dev.yml
+**/.env
+**/secrets/
+**/credentials/
+**/*.pem
+**/*.key
+**/*.p12
+**/*.jks
+
+# Documentation
+*.md
+docs/
+javadoc/
+
+# Node.js (if any frontend components exist)
+**/node_modules/
+package.json
+package-lock.json
+
+# Docker files
+.dockerignore
+Dockerfile
+docker-compose*.yml
+
+# Miscellaneous development files
+*.swp
+*.swo
+*.bak
+*.orig
+*.patch
+
+# Exceptions - files required for build
+!build.gradle
+!settings.gradle
+!gradlew
+!gradle/wrapper/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+!src/main/resources/application.yml
+!src/main/resources/application-prod.yml
