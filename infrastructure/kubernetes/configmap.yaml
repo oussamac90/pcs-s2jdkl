@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vcms-config
+  namespace: vcms
+  labels:
+    app: vcms
+    component: config
+    environment: production
+data:
+  application.yml: |
+    spring:
+      application:
+        name: vcms
+      profiles:
+        active: prod
+      main:
+        allow-bean-definition-overriding: false
+        banner-mode: off
+      jackson:
+        date-format: yyyy-MM-dd HH:mm:ss
+        time-zone: UTC
+        serialization:
+          write-dates-as-timestamps: false
+          fail-on-empty-beans: false
+      jpa:
+        open-in-view: false
+        hibernate:
+          ddl-auto: validate
+          jdbc:
+            batch_size: 100
+          order_inserts: true
+          order_updates: true
+      cache:
+        type: redis
+        redis:
+          time-to-live: 3600
+          cache-null-values: false
+
+    server:
+      port: 8080
+      compression:
+        enabled: true
+        mime-types:
+          - application/json
+          - application/xml
+          - text/html
+          - text/plain
+        min-response-size: 2048
+      http2:
+        enabled: true
+      tomcat:
+        max-threads: 200
+        min-spare-threads: 20
+        accept-count: 100
+
+    management:
+      endpoints:
+        web:
+          base-path: /actuator
+          exposure:
+            include:
+              - health
+              - info
+              - metrics
+              - prometheus
+              - loggers
+      metrics:
+        tags:
+          application: vcms
+        export:
+          prometheus:
+            enabled: true
