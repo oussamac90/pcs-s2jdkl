@@ -1,0 +1,134 @@
+#!/usr/bin/env sh
+
+# Enhanced Gradle wrapper script for Vessel Call Management System
+# Includes security validations and CI/CD integration features
+
+##############################################################################
+# Script Constants
+##############################################################################
+APP_HOME=$(cd "$(dirname "$0")" && pwd)
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m" "-XX:+HeapDumpOnOutOfMemoryError"'
+DOWNLOAD_TIMEOUT=180
+MAX_RETRIES=3
+
+##############################################################################
+# Utility Functions
+##############################################################################
+die() {
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "$timestamp ERROR: $1" >&2
+    # Log to CI/CD system if detected
+    if [ -n "$CI" ]; then
+        echo "##[error]$1"
+    fi
+    exit ${2:-1}
+}
+
+warn() {
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "$timestamp WARN: $1" >&2
+    # Log to CI/CD system if detected
+    if [ -n "$CI" ]; then
+        echo "##[warning]$1"
+    fi
+}
+
+validate_java() {
+    if [ -z "$JAVA_HOME" ]; then
+        die "JAVA_HOME is not set" 1
+    fi
+    
+    if [ ! -x "$JAVA_HOME/bin/java" ]; then
+        die "JAVA_HOME is invalid: $JAVA_HOME" 1
+    fi
+    
+    JAVA_VERSION=$("$JAVA_HOME/bin/java" -version 2>&1 | grep "version" | cut -d'"' -f2)
+    if [ -z "$JAVA_VERSION" ]; then
+        die "Unable to determine Java version" 1
+    fi
+}
+
+download_wrapper() {
+    local url="$1"
+    local destination="$2"
+    local attempt=1
+    
+    while [ $attempt -le $MAX_RETRIES ]; do
+        if command -v curl >/dev/null 2>&1; then
+            if curl --fail --connect-timeout $DOWNLOAD_TIMEOUT -S -s -L "$url" -o "$destination"; then
+                return 0
+            fi
+        elif command -v wget >/dev/null 2>&1; then
+            if wget --timeout=$DOWNLOAD_TIMEOUT --tries=1 -q -O "$destination" "$url"; then
+                return 0
+            fi
+        else
+            die "Neither curl nor wget available" 1
+        fi
+        
+        warn "Download attempt $attempt failed. Retrying..."
+        attempt=$((attempt + 1))
+        sleep 2
+    done
+    
+    return 1
+}
+
+##############################################################################
+# Environment Setup
+##############################################################################
+# Verify script is being run with proper permissions
+if [ ! -x "$0" ]; then
+    die "Gradle wrapper script must be executable" 1
+fi
+
+# Set Gradle specific environment
+if [ -z "$GRADLE_OPTS" ]; then
+    GRADLE_OPTS="$JAVA_OPTS -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true"
+fi
+
+# Set isolated Gradle user home if in CI environment
+if [ -n "$CI" ]; then
+    GRADLE_USER_HOME="$APP_HOME/.gradle"
+    export GRADLE_USER_HOME
+fi
+
+##############################################################################
+# Java Validation
+##############################################################################
+validate_java
+
+##############################################################################
+# Gradle Wrapper Setup
+##############################################################################
+CLASSPATH="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
+
+# Verify wrapper jar exists and has proper permissions
+if [ ! -r "$CLASSPATH" ]; then
+    warn "Gradle wrapper jar not found or not readable: $CLASSPATH"
+    
+    # Download wrapper jar with security checks
+    WRAPPER_URL="$(cat "$APP_HOME/gradle/wrapper/gradle-wrapper.properties" | grep "distributionUrl" | cut -d'=' -f2)"
+    if [ -z "$WRAPPER_URL" ]; then
+        die "Unable to determine wrapper URL from properties file" 1
+    fi
+    
+    if ! download_wrapper "$WRAPPER_URL" "$CLASSPATH"; then
+        die "Failed to download Gradle wrapper after $MAX_RETRIES attempts" 1
+    fi
+    
+    # Verify wrapper jar integrity
+    if [ ! -s "$CLASSPATH" ]; then
+        die "Downloaded wrapper jar is empty" 1
+    fi
+fi
+
+##############################################################################
+# Execute Gradle
+##############################################################################
+# Use exec to replace shell process with Java process
+exec "$JAVA_HOME/bin/java" $DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS \
+    "-Dorg.gradle.appname=$APP_BASE_NAME" \
+    -classpath "$CLASSPATH" \
+    org.gradle.wrapper.GradleWrapperMain \
+    "$@"
