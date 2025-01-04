@@ -1,0 +1,93 @@
+# Production Configuration for Vessel Call Management System
+# Spring Boot Version: 3.1.x
+
+spring:
+  application:
+    name: vcms
+  
+  # Database Configuration with High Availability and Performance Optimization
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+  
+  # JPA Configuration with Second Level Caching
+  jpa:
+    hibernate:
+      ddl-auto: validate
+      generate_statistics: false
+      cache:
+        use_second_level_cache: true
+        region:
+          factory_class: org.hibernate.cache.redis.hibernate.RedisRegionFactory
+  
+  # Redis Configuration with Clustering and SSL
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+    password: ${REDIS_PASSWORD}
+    cluster:
+      nodes: ${REDIS_CLUSTER_NODES}
+      max-redirects: 3
+    ssl: true
+    timeout: 10000
+  
+  # Security Configuration with OAuth2 and JWT
+  security:
+    require-ssl: true
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${AUTH_SERVER_URL}
+          jwk-set-uri: ${JWK_SET_URI}
+
+# Server Configuration with SSL and Performance Tuning
+server:
+  port: 8443
+  ssl:
+    enabled: true
+    key-store: ${SSL_KEYSTORE_PATH}
+    key-store-password: ${SSL_KEYSTORE_PASSWORD}
+    key-alias: ${SSL_KEY_ALIAS}
+  tomcat:
+    max-threads: 200
+    min-spare-threads: 20
+    max-connections: 10000
+    accept-count: 100
+
+# Monitoring and Metrics Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ["health", "info", "metrics", "prometheus"]
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram: true
+      sla: ["10ms", "50ms", "100ms", "200ms", "500ms"]
+
+# Application Specific Configuration
+app:
+  async:
+    core-pool-size: 16
+    max-pool-size: 100
+    queue-capacity: 20000
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: 43200  # 12 hours in seconds
+    refresh-token-expiration: 604800  # 7 days in seconds
+  cors:
+    allowed-origins: ["https://*.vcms.com"]
+    allowed-methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allowed-headers: ["Authorization", "Content-Type"]
+    max-age: 3600
