@@ -1,0 +1,57 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: vcms-metrics
+  namespace: vcms
+  labels:
+    app: vcms
+    component: monitoring
+    release: prometheus  # For Prometheus Operator service discovery
+    tier: backend
+spec:
+  selector:
+    matchLabels:
+      app: vcms
+      component: backend  # Targets the backend service pods
+  endpoints:
+    - port: http  # Spring Boot Actuator metrics endpoint
+      path: /actuator/prometheus
+      interval: 30s  # Scrape interval aligned with SLA monitoring requirements
+      scrapeTimeout: 10s  # Protection against hanging metric collection
+      honorLabels: true  # Preserve original metric labels
+      metricRelabelings:
+        # JVM Performance Metrics
+        - sourceLabels: ["__name__"]
+          regex: "jvm_(memory|cpu|gc).*"
+          action: "keep"
+        
+        # Process Resource Metrics
+        - sourceLabels: ["__name__"]
+          regex: "process_(cpu|memory|disk).*"
+          action: "keep"
+        
+        # HTTP Request Metrics
+        - sourceLabels: ["__name__"]
+          regex: "http_(server|client)_(requests|errors).*"
+          action: "keep"
+        
+        # Business Domain Metrics
+        - sourceLabels: ["__name__"]
+          regex: "vcms_(vessel|berth|service).*"
+          action: "keep"
+      relabelings:
+        # Add environment label
+        - sourceLabels: ["__meta_kubernetes_namespace"]
+          targetLabel: "environment"
+          
+        # Add service name
+        - sourceLabels: ["__meta_kubernetes_service_name"]
+          targetLabel: "service"
+          
+        # Add pod name
+        - sourceLabels: ["__meta_kubernetes_pod_name"]
+          targetLabel: "pod"
+          
+        # Add node name
+        - sourceLabels: ["__meta_kubernetes_node_name"]
+          targetLabel: "node"
