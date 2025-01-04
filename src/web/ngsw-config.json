@@ -1,0 +1,87 @@
+{
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "resources": {
+        "files": [
+          "/favicon.ico",
+          "/index.html",
+          "/manifest.webmanifest",
+          "/*.css",
+          "/*.js"
+        ]
+      }
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/assets/**",
+          "/assets/images/**",
+          "/assets/i18n/**",
+          "/assets/styles/**",
+          "/assets/icons/**",
+          "/assets/fonts/**",
+          "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
+        ]
+      }
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "vessel-api",
+      "urls": [
+        "/api/v1/vessel-calls/**",
+        "/api/v1/berths/**"
+      ],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 100,
+        "maxAge": "3h",
+        "timeout": "10s",
+        "timeoutResponse": "stale-while-revalidate"
+      }
+    },
+    {
+      "name": "static-api",
+      "urls": [
+        "/api/v1/ports/**",
+        "/api/v1/services/**"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 100,
+        "maxAge": "1d",
+        "timeoutResponse": "stale-if-error"
+      }
+    },
+    {
+      "name": "dynamic-data",
+      "urls": [
+        "/api/v1/notifications/**",
+        "/api/v1/dashboard/**"
+      ],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 50,
+        "maxAge": "30m",
+        "timeout": "5s",
+        "timeoutResponse": "network-only"
+      }
+    }
+  ],
+  "navigationUrls": [
+    "/**",
+    "!/**/*.*",
+    "!/**/*__*",
+    "!/**/*__*/**",
+    "!/api/**",
+    "!/auth/**"
+  ],
+  "navigationRequestStrategy": "performance"
+}
