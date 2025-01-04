@@ -1,0 +1,211 @@
+// =============================================================================
+// VESSEL CALL MANAGEMENT SYSTEM - THEME CONFIGURATION
+// Version: 1.0.0
+// =============================================================================
+
+// Import core variables and mixins
+@use 'variables' as *;
+@use 'mixins' as *;
+
+// -----------------------------------------------------------------------------
+// Theme Maps
+// -----------------------------------------------------------------------------
+
+// Light Theme Configuration
+$theme-light: (
+  background: #FFFFFF,
+  surface: #F5F5F5,
+  text-primary: #212121,
+  text-secondary: #757575,
+  border: #E0E0E0,
+  shadow: rgba(0, 0, 0, 0.1),
+  control-room: (
+    background: #F8F9FA,
+    text: #000000,
+    border: #D1D5DB
+  ),
+  outdoor: (
+    background: #FFFFFF,
+    text: #000000,
+    border: #000000
+  )
+);
+
+// Dark Theme Configuration
+$theme-dark: (
+  background: #121212,
+  surface: #1E1E1E,
+  text-primary: #FFFFFF,
+  text-secondary: #B0B0B0,
+  border: #333333,
+  shadow: rgba(0, 0, 0, 0.2),
+  control-room: (
+    background: #1A1A1A,
+    text: #FFFFFF,
+    border: #404040
+  ),
+  outdoor: (
+    background: #000000,
+    text: #FFFFFF,
+    border: #FFFFFF
+  )
+);
+
+// High Contrast Theme Configuration
+$theme-high-contrast: (
+  background: #000000,
+  surface: #000000,
+  text-primary: #FFFFFF,
+  text-secondary: #FFFFFF,
+  border: #FFFFFF,
+  shadow: none,
+  control-room: (
+    background: #000000,
+    text: #FFFFFF,
+    border: #FFFFFF
+  ),
+  outdoor: (
+    background: #000000,
+    text: #FFFFFF,
+    border: #FFFFFF
+  )
+);
+
+// -----------------------------------------------------------------------------
+// Theme Functions
+// -----------------------------------------------------------------------------
+
+// Get theme color with contrast validation
+@function get-theme-color($color-key, $environment: 'default') {
+  $current-theme: $theme-light !global;
+  @if $environment == 'control-room' {
+    $color: map-get(map-get($current-theme, 'control-room'), $color-key);
+    @return validate-contrast($color, map-get(map-get($current-theme, 'control-room'), 'background'));
+  } @else if $environment == 'outdoor' {
+    $color: map-get(map-get($current-theme, 'outdoor'), $color-key);
+    @return validate-contrast($color, map-get(map-get($current-theme, 'outdoor'), 'background'));
+  } @else {
+    $color: map-get($current-theme, $color-key);
+    @return validate-contrast($color, map-get($current-theme, 'background'));
+  }
+}
+
+// Validate color contrast ratio
+@function validate-contrast($foreground, $background) {
+  $luminance1: get-relative-luminance($foreground);
+  $luminance2: get-relative-luminance($background);
+  
+  $ratio: ($luminance1 + 0.05) / ($luminance2 + 0.05);
+  @if $ratio < 1 {
+    $ratio: 1 / $ratio;
+  }
+  
+  // WCAG 2.1 Level AA requires 4.5:1 for normal text
+  @if $ratio < 4.5 {
+    @warn "Contrast ratio #{$ratio} does not meet WCAG 2.1 AA standards";
+    @return adjust-color($foreground, $lightness: if($luminance1 > $luminance2, -10%, 10%));
+  }
+  
+  @return $foreground;
+}
+
+// Calculate relative luminance
+@function get-relative-luminance($color) {
+  $red: red($color) / 255;
+  $green: green($color) / 255;
+  $blue: blue($color) / 255;
+  
+  $red: if($red <= 0.03928, $red / 12.92, pow(($red + 0.055) / 1.055, 2.4));
+  $green: if($green <= 0.03928, $green / 12.92, pow(($green + 0.055) / 1.055, 2.4));
+  $blue: if($blue <= 0.03928, $blue / 12.92, pow(($blue + 0.055) / 1.055, 2.4));
+  
+  @return $red * 0.2126 + $green * 0.7152 + $blue * 0.0722;
+}
+
+// -----------------------------------------------------------------------------
+// Theme Mixins
+// -----------------------------------------------------------------------------
+
+// Apply theme with environment context
+@mixin apply-theme($theme-map, $environment: 'default') {
+  @if $environment == 'control-room' {
+    $theme-context: map-get($theme-map, 'control-room');
+    background-color: map-get($theme-context, 'background');
+    color: map-get($theme-context, 'text');
+    border-color: map-get($theme-context, 'border');
+    
+    // Enhanced readability for control room displays
+    font-size: $font-size-lg;
+    letter-spacing: 0.5px;
+  } @else if $environment == 'outdoor' {
+    $theme-context: map-get($theme-map, 'outdoor');
+    background-color: map-get($theme-context, 'background');
+    color: map-get($theme-context, 'text');
+    border-color: map-get($theme-context, 'border');
+    
+    // Enhanced visibility for outdoor displays
+    font-weight: $font-weight-bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  } @else {
+    background-color: map-get($theme-map, 'background');
+    color: map-get($theme-map, 'text-primary');
+    border-color: map-get($theme-map, 'border');
+  }
+}
+
+// Apply maritime-specific theme optimizations
+@mixin apply-maritime-theme($theme-map) {
+  // Status colors with enhanced visibility
+  @each $status, $color in $status-colors {
+    --status-#{$status}: #{validate-contrast($color, map-get($theme-map, 'background'))};
+  }
+  
+  // Maritime-specific optimizations
+  --vessel-highlight: #{validate-contrast($color-primary, map-get($theme-map, 'background'))};
+  --berth-occupied: #{validate-contrast(map-get($status-colors, 'at_berth'), map-get($theme-map, 'background'))};
+  --berth-available: #{validate-contrast(map-get($status-colors, 'planned'), map-get($theme-map, 'background'))};
+  
+  // Enhanced focus indicators for maritime operations
+  --focus-ring-color: #{validate-contrast($color-primary, map-get($theme-map, 'background'))};
+  --focus-ring-style: solid;
+  --focus-ring-width: 3px;
+}
+
+// -----------------------------------------------------------------------------
+// Theme Provider Class
+// -----------------------------------------------------------------------------
+
+.theme-provider {
+  // Default theme variables
+  @include apply-theme($theme-light);
+  @include apply-maritime-theme($theme-light);
+  
+  // Dark theme
+  &.theme-dark {
+    @include apply-theme($theme-dark);
+    @include apply-maritime-theme($theme-dark);
+  }
+  
+  // High contrast theme
+  &.theme-high-contrast {
+    @include apply-theme($theme-high-contrast);
+    @include apply-maritime-theme($theme-high-contrast);
+  }
+  
+  // Environment-specific themes
+  &.environment-control-room {
+    @include apply-theme($theme-light, 'control-room');
+    
+    &.theme-dark {
+      @include apply-theme($theme-dark, 'control-room');
+    }
+  }
+  
+  &.environment-outdoor {
+    @include apply-theme($theme-light, 'outdoor');
+    
+    &.theme-dark {
+      @include apply-theme($theme-dark, 'outdoor');
+    }
+  }
+}
