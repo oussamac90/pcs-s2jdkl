@@ -1,0 +1,223 @@
+// Import core design tokens and utilities
+@use 'src/web/src/assets/styles/variables' as *;
+@use 'src/web/src/assets/styles/mixins' as *;
+
+// Root container for service booking form
+.service-form {
+  display: flex;
+  flex-direction: column;
+  padding: spacing(3);
+  background-color: $color-white;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-md;
+  max-width: map-get($container-max-widths, 'md');
+  margin: 0 auto;
+
+  @include respond-to('sm') {
+    padding: spacing(4);
+  }
+
+  @include high-contrast-mode {
+    border: 2px solid $color-black;
+    box-shadow: none;
+  }
+}
+
+// Form section containers
+.form-section {
+  margin-bottom: spacing(4);
+  border-bottom: 1px solid $color-gray-200;
+  padding-bottom: spacing(3);
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  h2 {
+    color: $color-gray-900;
+    font-size: $font-size-lg;
+    margin-bottom: spacing(3);
+    font-weight: $font-weight-medium;
+  }
+}
+
+// Form field groups
+.form-group {
+  margin-bottom: spacing(3);
+  position: relative;
+
+  label {
+    display: block;
+    margin-bottom: spacing(1);
+    color: $color-gray-800;
+    font-weight: $font-weight-medium;
+    font-size: $font-size-md;
+
+    &.required::after {
+      content: '*';
+      color: $color-error;
+      margin-left: spacing(0.5);
+    }
+  }
+
+  .field-hint {
+    font-size: $font-size-sm;
+    color: $color-gray-600;
+    margin-top: spacing(0.5);
+  }
+
+  .error-message {
+    color: $color-error;
+    font-size: $font-size-sm;
+    margin-top: spacing(1);
+    font-weight: $font-weight-medium;
+  }
+}
+
+// Service selection area
+.service-selection {
+  display: grid;
+  gap: spacing(2);
+  grid-template-columns: 1fr;
+
+  @include respond-to('md') {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .service-option {
+    padding: spacing(2);
+    border: 1px solid $color-gray-300;
+    border-radius: $border-radius-md;
+    cursor: pointer;
+    transition: $transition-base;
+
+    &:hover {
+      border-color: $color-primary;
+    }
+
+    &.selected {
+      border-color: $color-primary;
+      background-color: rgba($color-primary, 0.05);
+    }
+
+    @include focus-visible;
+  }
+}
+
+// Date and time picker container
+.datetime-picker {
+  display: flex;
+  gap: spacing(2);
+  flex-wrap: wrap;
+
+  .date-field,
+  .time-field {
+    flex: 1;
+    min-width: 200px;
+
+    input {
+      width: 100%;
+      min-height: 44px; // Enhanced touch target
+      padding: spacing(1.5);
+      border: 1px solid $color-gray-300;
+      border-radius: $border-radius-md;
+      font-size: $font-size-md;
+
+      &:focus {
+        border-color: $color-primary;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+      }
+
+      @include high-contrast-mode {
+        border-width: 2px;
+      }
+    }
+  }
+}
+
+// Cost summary section
+.cost-summary {
+  margin-top: spacing(4);
+  padding: spacing(3);
+  background-color: $color-gray-100;
+  border-radius: $border-radius-md;
+
+  .cost-label {
+    font-size: $font-size-md;
+    color: $color-gray-700;
+  }
+
+  .cost-amount {
+    font-size: $font-size-xl;
+    color: $color-gray-900;
+    font-weight: $font-weight-bold;
+    margin-top: spacing(1);
+  }
+
+  @include high-contrast-mode {
+    border: 2px solid $color-black;
+    background-color: $color-white;
+  }
+}
+
+// Form action buttons
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: spacing(2);
+  margin-top: spacing(4);
+
+  button {
+    @include maritime-button;
+    min-width: 120px;
+    min-height: 48px; // Enhanced touch target
+
+    &.secondary {
+      background-color: $color-gray-100;
+      color: $color-gray-900;
+
+      &:hover {
+        background-color: $color-gray-200;
+      }
+    }
+
+    &.primary {
+      background-color: $color-primary;
+      color: $color-white;
+
+      &:hover {
+        background-color: darken($color-primary, 10%);
+      }
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .service-form {
+    box-shadow: none;
+    border: 1px solid $color-gray-300;
+  }
+
+  .action-buttons {
+    display: none;
+  }
+}
+
+// Outdoor visibility enhancements
+@media (max-width: $breakpoint-md) and (min-width: $breakpoint-sm) and (orientation: landscape) {
+  .service-form {
+    font-size: $font-size-lg;
+    background-color: rgba($color-white, 0.95);
+  }
+
+  .form-group label {
+    font-weight: $font-weight-bold;
+  }
+
+  .cost-summary {
+    background-color: rgba($color-gray-100, 0.9);
+  }
+}
