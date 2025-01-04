@@ -1,0 +1,171 @@
+# Prometheus Alert Rules Configuration v2.45.0
+# Defines monitoring thresholds and alert conditions for the Vessel Call Management System
+
+groups:
+  # System Resource Monitoring
+  - name: system_resources
+    rules:
+      # CPU Usage Warning Alert
+      - alert: HighCPUUsage
+        expr: avg(rate(process_cpu_usage[5m])) by (instance, pod) > 0.70
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+          team: platform
+        annotations:
+          summary: High CPU usage detected on {{ $labels.instance }}
+          description: CPU usage is above 70% for 5 minutes on pod {{ $labels.pod }}
+
+      # CPU Usage Critical Alert
+      - alert: CriticalCPUUsage
+        expr: avg(rate(process_cpu_usage[5m])) by (instance, pod) > 0.85
+        for: 5m
+        labels:
+          severity: critical
+          component: system
+          team: platform
+        annotations:
+          summary: Critical CPU usage on {{ $labels.instance }}
+          description: CPU usage is above 85% for 5 minutes on pod {{ $labels.pod }}
+
+      # Memory Usage Warning Alert
+      - alert: HighMemoryUsage
+        expr: avg(container_memory_usage_bytes / container_spec_memory_limit_bytes) by (instance, pod) > 0.75
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+          team: platform
+        annotations:
+          summary: High memory usage on {{ $labels.instance }}
+          description: Memory usage is above 75% for 5 minutes on pod {{ $labels.pod }}
+
+      # Memory Usage Critical Alert
+      - alert: CriticalMemoryUsage
+        expr: avg(container_memory_usage_bytes / container_spec_memory_limit_bytes) by (instance, pod) > 0.90
+        for: 5m
+        labels:
+          severity: critical
+          component: system
+          team: platform
+        annotations:
+          summary: Critical memory usage on {{ $labels.instance }}
+          description: Memory usage is above 90% for 5 minutes on pod {{ $labels.pod }}
+
+  # Application Performance Monitoring
+  - name: application_performance
+    rules:
+      # API Response Time Warning
+      - alert: APIHighLatency
+        expr: histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job='vcms-api'}[5m])) by (le, endpoint)) > 2
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+          team: backend
+        annotations:
+          summary: High API latency on {{ $labels.endpoint }}
+          description: 95th percentile latency is above 2s for endpoint {{ $labels.endpoint }}
+
+      # API Response Time Critical
+      - alert: APICriticalLatency
+        expr: histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job='vcms-api'}[5m])) by (le, endpoint)) > 5
+        for: 5m
+        labels:
+          severity: critical
+          component: api
+          team: backend
+        annotations:
+          summary: Critical API latency on {{ $labels.endpoint }}
+          description: 95th percentile latency is above 5s for endpoint {{ $labels.endpoint }}
+
+      # Error Rate Warning
+      - alert: HighErrorRate
+        expr: sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) / sum(rate(http_server_requests_seconds_count[5m])) > 0.01
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+          team: backend
+        annotations:
+          summary: High error rate detected
+          description: Error rate is above 1% for the last 5 minutes
+
+      # Error Rate Critical
+      - alert: CriticalErrorRate
+        expr: sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) / sum(rate(http_server_requests_seconds_count[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          component: api
+          team: backend
+        annotations:
+          summary: Critical error rate detected
+          description: Error rate is above 5% for the last 5 minutes
+
+  # Business Metrics Monitoring
+  - name: business_metrics
+    rules:
+      # Berth Utilization Alert
+      - alert: LowBerthUtilization
+        expr: vcms_berth_utilization_ratio < 0.60
+        for: 1h
+        labels:
+          severity: warning
+          component: business
+          team: operations
+        annotations:
+          summary: Low berth utilization detected
+          description: Berth utilization has been below 60% for 1 hour
+
+      # Vessel Waiting Time Alert
+      - alert: HighVesselWaitingTime
+        expr: vcms_vessel_waiting_time_minutes > 120
+        for: 30m
+        labels:
+          severity: warning
+          component: business
+          team: operations
+        annotations:
+          summary: High vessel waiting time detected
+          description: Vessels are waiting more than 2 hours for berthing
+
+      # Service Booking Success Rate
+      - alert: LowServiceBookingSuccess
+        expr: rate(vcms_service_booking_success_total[30m]) / rate(vcms_service_booking_total[30m]) < 0.90
+        for: 15m
+        labels:
+          severity: warning
+          component: business
+          team: operations
+        annotations:
+          summary: Low service booking success rate
+          description: Service booking success rate is below 90% for the last 15 minutes
+
+  # System Availability Monitoring
+  - name: system_availability
+    rules:
+      # Service Availability Alert
+      - alert: ServiceUnavailable
+        expr: up{job="vcms-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: system
+          team: platform
+        annotations:
+          summary: Service is unavailable
+          description: The VCMS API service {{ $labels.instance }} is down
+
+      # High Pod Restart Rate
+      - alert: HighPodRestartRate
+        expr: increase(kube_pod_container_status_restarts_total{namespace="vcms"}[1h]) > 2
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+          team: platform
+        annotations:
+          summary: High pod restart rate detected
+          description: Pod {{ $labels.pod }} has restarted more than 2 times in the last hour
