@@ -1,0 +1,32 @@
+<div class="loading-container" 
+     role="progressbar" 
+     aria-label="Loading content" 
+     aria-live="polite" 
+     aria-busy="true"
+     [attr.aria-hidden]="!visible"
+     [class.loading-visible]="visible"
+     [class.loading-error]="hasError">
+
+  <mat-progress-spinner
+    class="loading-spinner"
+    [diameter]="diameter"
+    [color]="color"
+    mode="indeterminate"
+    aria-valuemin="0"
+    aria-valuemax="100">
+  </mat-progress-spinner>
+
+  <div *ngIf="showText" 
+       class="loading-text"
+       [attr.dir]="'auto'">
+    {{ 'COMMON.LOADING' | translate }}
+  </div>
+
+  <!-- Error message for timeout scenarios -->
+  <div *ngIf="hasError" 
+       class="loading-error-text"
+       role="alert"
+       aria-live="assertive">
+    {{ 'COMMON.LOADING_ERROR' | translate }}
+  </div>
+</div>
