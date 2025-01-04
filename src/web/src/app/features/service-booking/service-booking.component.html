@@ -1,0 +1,160 @@
+<!-- Service Booking Management Container -->
+<div class="service-booking-container maritime-theme" role="main" aria-label="Service Booking Management">
+  <!-- Header Section -->
+  <header class="header" role="banner">
+    <div class="header-content">
+      <h1 class="maritime-header" aria-level="1">Port Services Booking</h1>
+      <div class="header-actions" role="toolbar" aria-label="Booking Actions">
+        <button mat-raised-button 
+                color="primary" 
+                (click)="openServiceBookingDialog()"
+                aria-label="Create New Service Booking"
+                accesskey="n">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          New Booking
+        </button>
+        <button mat-icon-button 
+                [matTooltip]="'View Service Rates'"
+                aria-label="View Service Rates"
+                (click)="viewServiceRates()">
+          <mat-icon aria-hidden="true">info</mat-icon>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Loading State -->
+  <div *ngIf="loading$ | async" 
+       class="loading-overlay" 
+       role="progressbar" 
+       aria-label="Loading Service Bookings">
+    <mat-spinner diameter="48" aria-hidden="true"></mat-spinner>
+    <span class="screen-reader-only">Loading service bookings, please wait...</span>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error$ | async as error" 
+       class="error-message" 
+       role="alert" 
+       aria-live="assertive">
+    {{ error }}
+  </div>
+
+  <!-- Service Bookings List -->
+  <div class="bookings-list" 
+       role="list" 
+       aria-label="Service Bookings"
+       *ngIf="serviceBookings$ | async as bookings">
+    
+    <!-- Empty State -->
+    <div *ngIf="bookings.length === 0" 
+         class="empty-state" 
+         role="status" 
+         aria-live="polite">
+      <mat-icon aria-hidden="true">event_busy</mat-icon>
+      <p>No service bookings found</p>
+    </div>
+
+    <!-- Bookings Grid -->
+    <div class="bookings-grid">
+      <mat-card *ngFor="let booking of bookings; trackBy: trackByBookingId"
+                class="service-item"
+                [ngClass]="'status-' + booking.status.toLowerCase()"
+                role="listitem"
+                tabindex="0">
+        
+        <!-- Card Header -->
+        <mat-card-header>
+          <mat-card-title>
+            <span class="service-type" [attr.aria-label]="'Service Type: ' + booking.serviceType">
+              {{ booking.serviceType }}
+            </span>
+            <span class="status-badge" 
+                  [attr.aria-label]="'Status: ' + booking.status"
+                  [ngClass]="'status-' + booking.status.toLowerCase()">
+              {{ booking.status }}
+            </span>
+          </mat-card-title>
+          <mat-card-subtitle>
+            <span class="vessel-name">{{ booking.vesselName }}</span>
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <!-- Card Content -->
+        <mat-card-content>
+          <dl class="booking-details">
+            <dt>Service Time:</dt>
+            <dd aria-label="Scheduled Service Time">
+              {{ booking.serviceTime | date:'medium' }}
+            </dd>
+
+            <dt>Quantity:</dt>
+            <dd aria-label="Service Quantity">
+              {{ booking.quantity }}
+            </dd>
+
+            <dt>Estimated Cost:</dt>
+            <dd aria-label="Estimated Service Cost">
+              {{ booking.estimatedCost | currency }}
+            </dd>
+
+            <dt>Remarks:</dt>
+            <dd *ngIf="booking.remarks; else noRemarks" 
+                aria-label="Service Remarks">
+              {{ booking.remarks }}
+            </dd>
+            <ng-template #noRemarks>
+              <dd aria-label="No remarks provided">None</dd>
+            </ng-template>
+          </dl>
+        </mat-card-content>
+
+        <!-- Card Actions -->
+        <mat-card-actions align="end" 
+                         role="toolbar" 
+                         aria-label="Booking Actions">
+          <button mat-button
+                  color="primary"
+                  (click)="openServiceBookingDialog(booking)"
+                  [attr.aria-label]="'Edit booking for ' + booking.vesselName"
+                  accesskey="e">
+            <mat-icon aria-hidden="true">edit</mat-icon>
+            Edit
+          </button>
+          <button mat-button
+                  color="warn"
+                  (click)="deleteServiceBooking(booking.id)"
+                  [attr.aria-label]="'Delete booking for ' + booking.vesselName"
+                  accesskey="d">
+            <mat-icon aria-hidden="true">delete</mat-icon>
+            Delete
+          </button>
+        </mat-card-actions>
+
+        <!-- Real-time Update Indicator -->
+        <div *ngIf="booking.isUpdating" 
+             class="update-indicator" 
+             role="status" 
+             aria-live="polite">
+          <mat-spinner diameter="20" aria-hidden="true"></mat-spinner>
+          <span class="screen-reader-only">Updating booking status...</span>
+        </div>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Service Form Component -->
+  <app-service-form
+    *ngIf="showServiceForm"
+    [editBooking]="selectedBooking"
+    (formSubmit)="handleFormSubmit($event)"
+    (formCancel)="handleFormCancel()">
+  </app-service-form>
+</div>
+
+<!-- Screen Reader Announcements -->
+<div aria-live="polite" 
+     class="screen-reader-only" 
+     [attr.aria-atomic]="true">
+  {{ screenReaderAnnouncement }}
+</div>
