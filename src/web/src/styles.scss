@@ -1,0 +1,239 @@
+// =============================================================================
+// VESSEL CALL MANAGEMENT SYSTEM - GLOBAL STYLES
+// Version: 1.0.0
+// =============================================================================
+
+// Import external dependencies
+@use '@angular/material/prebuilt-themes/indigo-pink.css';
+@use 'normalize.css/normalize.css';
+
+// Import internal dependencies
+@use 'assets/styles/variables' as *;
+@use 'assets/styles/mixins' as *;
+
+// -----------------------------------------------------------------------------
+// Global Reset & Base Styles
+// -----------------------------------------------------------------------------
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --control-room-brightness: 100%;
+  --outdoor-visibility: 100%;
+  --emergency-mode: 0;
+}
+
+html {
+  font-size: $font-size-base;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-family: $font-family-primary;
+  line-height: $line-height-base;
+  color: $color-gray-900;
+  background-color: $color-gray-100;
+  overflow-x: hidden;
+  
+  @include optimize-animation;
+}
+
+// -----------------------------------------------------------------------------
+// Typography
+// -----------------------------------------------------------------------------
+
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: spacing(2);
+  font-weight: $font-weight-medium;
+  line-height: 1.2;
+}
+
+p {
+  margin-bottom: spacing(2);
+}
+
+// -----------------------------------------------------------------------------
+// Maritime-Specific Layout Components
+// -----------------------------------------------------------------------------
+
+.control-room-container {
+  max-width: 100%;
+  min-height: 100vh;
+  padding: spacing(2);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: spacing(2);
+  
+  @include control-room-display {
+    padding: spacing(3);
+    gap: spacing(3);
+  }
+}
+
+.vessel-timeline {
+  @include vessel-timeline-grid;
+}
+
+.berth-allocation-board {
+  @include berth-allocation-layout;
+}
+
+// -----------------------------------------------------------------------------
+// Maritime Status Indicators
+// -----------------------------------------------------------------------------
+
+.status-planned { @include status-indicator('planned'); }
+.status-arrived { @include status-indicator('arrived'); }
+.status-at-berth { @include status-indicator('at_berth'); }
+.status-departed { @include status-indicator('departed'); }
+.status-cancelled { @include status-indicator('cancelled'); }
+
+// -----------------------------------------------------------------------------
+// Accessibility Enhancements
+// -----------------------------------------------------------------------------
+
+.maritime-focus {
+  @include focus-visible;
+}
+
+.screen-reader-only {
+  @include screen-reader-only;
+}
+
+// High Contrast Mode Optimizations
+@include high-contrast-mode {
+  :root {
+    --control-room-brightness: 120%;
+  }
+
+  .vessel-card {
+    border: 2px solid $color-black;
+    box-shadow: none;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Responsive Design
+// -----------------------------------------------------------------------------
+
+// Mobile Optimizations
+@include respond-to('xs') {
+  html {
+    font-size: $font-size-base * 0.9;
+  }
+  
+  .control-room-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Tablet Optimizations
+@include respond-to('md') {
+  html {
+    font-size: $font-size-base;
+  }
+}
+
+// Desktop & Large Displays
+@include respond-to('lg') {
+  html {
+    font-size: $font-size-base * 1.1;
+  }
+}
+
+// Control Room Display Mode
+@include control-room-display {
+  html {
+    font-size: $font-size-lg;
+  }
+  
+  .vessel-card {
+    padding: spacing(4);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Print Styles
+// -----------------------------------------------------------------------------
+
+@media print {
+  body {
+    background: $color-white;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  .vessel-card {
+    break-inside: avoid;
+    border: 1px solid $color-gray-300;
+    box-shadow: none;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Utility Classes
+// -----------------------------------------------------------------------------
+
+.maritime-button {
+  @include maritime-button;
+}
+
+.berth-indicator {
+  &--occupied { @include berth-indicator(true); }
+  &--available { @include berth-indicator(false); }
+}
+
+// Hardware Acceleration for Complex Animations
+.hardware-accelerated {
+  @include hardware-accelerate;
+}
+
+// -----------------------------------------------------------------------------
+// Angular Material Theme Customization
+// -----------------------------------------------------------------------------
+
+.mat-typography {
+  font-family: $font-family-primary;
+}
+
+.mat-primary {
+  color: $color-primary;
+}
+
+.mat-card {
+  @include vessel-card;
+}
+
+// -----------------------------------------------------------------------------
+// Emergency Mode Styles
+// -----------------------------------------------------------------------------
+
+body[data-emergency="true"] {
+  --emergency-mode: 1;
+  
+  .control-room-container {
+    background-color: rgba($color-error, 0.1);
+  }
+  
+  .vessel-card {
+    border: 2px solid $color-error;
+  }
+  
+  .status-indicator {
+    animation: pulse 2s infinite;
+  }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
