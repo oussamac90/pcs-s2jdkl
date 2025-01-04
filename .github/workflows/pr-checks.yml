@@ -1,0 +1,147 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches: 
+      - main
+      - develop
+    paths:
+      - 'src/backend/**'
+      - 'src/web/**'
+      - 'build.gradle'
+      - 'package.json'
+
+env:
+  JAVA_VERSION: '17'
+  NODE_VERSION: '18.x'
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+jobs:
+  backend_validation:
+    name: Backend Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Run unit tests
+        working-directory: ./src/backend
+        run: ./gradlew test
+
+      - name: Run integration tests
+        working-directory: ./src/backend
+        run: ./gradlew integrationTest
+
+      - name: SonarQube analysis
+        uses: sonarsource/sonarqube-scan-action@v1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=vcms
+            -Dsonar.java.binaries=build/classes
+            -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml
+
+      - name: Run dependency vulnerability scan
+        working-directory: ./src/backend
+        run: ./gradlew dependencyCheckAnalyze
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-test-reports
+          path: |
+            src/backend/build/reports/tests
+            src/backend/build/reports/jacoco
+            src/backend/build/reports/dependency-check
+
+  frontend_validation:
+    name: Frontend Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: src/web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./src/web
+        run: npm ci
+
+      - name: Run linting
+        working-directory: ./src/web
+        run: npm run lint
+
+      - name: Run unit tests
+        working-directory: ./src/web
+        run: npm run test -- --no-watch --no-progress --browsers=ChromeHeadless --code-coverage
+
+      - name: Run security audit
+        working-directory: ./src/web
+        run: npm audit
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-test-reports
+          path: |
+            src/web/coverage
+            src/web/karma-results
+
+  security_scan:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: java, javascript
+          queries: security-and-quality
+
+      - name: Build with Gradle
+        working-directory: ./src/backend
+        run: ./gradlew build -x test
+
+      - name: Build with npm
+        working-directory: ./src/web
+        run: |
+          npm ci
+          npm run build
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            src/backend/build/reports/dependency-check
+            src/web/npm-audit.json
+            results/codeql
