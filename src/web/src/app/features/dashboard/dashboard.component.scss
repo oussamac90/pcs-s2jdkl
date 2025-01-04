@@ -1,0 +1,189 @@
+// Import maritime-optimized design tokens and variables
+@use '../../../assets/styles/variables' as *;
+@use '../../../assets/styles/mixins' as *;
+
+// Maritime-optimized main container for dashboard layout
+.dashboard-container {
+  display: grid;
+  grid-gap: spacing(3);
+  padding: spacing(2);
+  min-height: 100vh;
+  background: var(--dashboard-bg, $color-gray-100);
+  touch-action: manipulation; // Optimize touch interactions
+
+  // Responsive grid layout optimized for maritime displays
+  @include respond-to('xs') {
+    grid-template-columns: 1fr;
+    gap: spacing(2);
+  }
+
+  @include respond-to('md') {
+    grid-template-columns: repeat(2, 1fr);
+    padding: spacing(3);
+  }
+
+  @include respond-to('lg') {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @include control-room-display {
+    grid-template-columns: repeat(4, 1fr);
+    gap: spacing(4);
+  }
+}
+
+// Enhanced header section for maritime operations
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: spacing(3);
+  min-height: 64px;
+  padding: spacing(2);
+  background: var(--header-bg, rgba($color-white, 0.95));
+  backdrop-filter: blur(8px);
+  grid-column: 1 / -1;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-sm;
+
+  @include high-contrast-mode {
+    background: $color-white;
+    border: 2px solid $color-black;
+  }
+}
+
+// High-visibility vessel summary card
+.vessel-summary {
+  @include vessel-card;
+  grid-column: 1 / -1;
+  min-height: 200px;
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    margin-bottom: spacing(2);
+    color: var(--title-color, $color-secondary);
+  }
+
+  &__grid {
+    display: grid;
+    gap: spacing(2);
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+// Enhanced berth utilization chart container
+.berth-utilization {
+  @include vessel-card;
+  min-height: 300px;
+  grid-column: span 2;
+
+  @include respond-to('xs') {
+    grid-column: 1 / -1;
+  }
+
+  &__chart {
+    height: 100%;
+    width: 100%;
+    padding: spacing(2);
+  }
+
+  &__legend {
+    display: flex;
+    gap: spacing(2);
+    flex-wrap: wrap;
+    margin-top: spacing(2);
+  }
+}
+
+// Touch-optimized expected arrivals list
+.expected-arrivals {
+  @include vessel-card;
+  max-height: 500px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: $color-gray-400 transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $color-gray-400;
+    border-radius: $border-radius-lg;
+  }
+
+  &__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  &__item {
+    padding: spacing(2);
+    border-bottom: 1px solid $color-gray-200;
+    display: flex;
+    align-items: center;
+    gap: spacing(2);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
+
+// High-visibility vessel status indicator
+.status-indicator {
+  @each $status, $color in $status-colors {
+    &--#{$status} {
+      @include status-indicator($status);
+    }
+  }
+}
+
+// Maritime-optimized action buttons
+.action-button {
+  @include maritime-button;
+  background-color: var(--button-bg, $color-primary);
+  color: $color-white;
+
+  &:hover:not(:disabled) {
+    background-color: darken($color-primary, 10%);
+  }
+
+  &--secondary {
+    background-color: var(--button-secondary-bg, $color-secondary);
+
+    &:hover:not(:disabled) {
+      background-color: darken($color-secondary, 10%);
+    }
+  }
+}
+
+// Enhanced accessibility for maritime operations
+@include high-contrast-mode {
+  .dashboard-container {
+    background: $color-white;
+  }
+
+  .vessel-summary,
+  .berth-utilization,
+  .expected-arrivals {
+    border: 2px solid $color-black;
+    box-shadow: none;
+  }
+
+  .status-indicator {
+    border: 1px solid currentColor;
+  }
+}
+
+// Optimize for reduced motion
+@include optimize-animation;
+
+// Hardware acceleration for smooth animations
+@include hardware-accelerate;
