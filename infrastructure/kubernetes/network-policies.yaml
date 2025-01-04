@@ -1,0 +1,113 @@
+# Kubernetes NetworkPolicy API version: networking.k8s.io/v1 (v1.24+)
+# Purpose: Define strict network isolation and security controls between VCMS components
+
+---
+# Frontend Network Policy
+# Controls ingress/egress traffic for frontend pods
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-policy
+  namespace: vcms
+  labels:
+    app: vcms
+    tier: frontend
+    security: strict
+spec:
+  podSelector:
+    matchLabels:
+      app: vcms
+      component: frontend
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow incoming HTTP traffic only from ingress-nginx namespace
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 80
+  egress:
+    # Allow outgoing traffic only to backend API endpoints
+    - to:
+        - podSelector:
+            matchLabels:
+              app: vcms
+              component: backend
+      ports:
+        - protocol: TCP
+          port: 8080
+
+---
+# Backend Network Policy
+# Controls ingress/egress traffic for backend pods
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-policy
+  namespace: vcms
+  labels:
+    app: vcms
+    tier: backend
+    security: strict
+spec:
+  podSelector:
+    matchLabels:
+      app: vcms
+      component: backend
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow incoming API requests only from frontend applications
+    - from:
+        - podSelector:
+            matchLabels:
+              app: vcms
+              component: frontend
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    # Allow outgoing traffic only to Redis cache instances
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+              component: cache
+      ports:
+        - protocol: TCP
+          port: 6379
+
+---
+# Redis Network Policy
+# Controls ingress traffic for Redis cache pods
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-policy
+  namespace: vcms
+  labels:
+    app: redis
+    tier: cache
+    security: strict
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+      component: cache
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow incoming connections only from authorized backend pods
+    - from:
+        - podSelector:
+            matchLabels:
+              app: vcms
+              component: backend
+      ports:
+        - protocol: TCP
+          port: 6379
