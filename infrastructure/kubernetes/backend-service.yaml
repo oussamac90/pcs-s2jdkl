@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vcms-backend
+  namespace: vcms
+  labels:
+    app: vcms
+    component: backend
+    environment: production
+  annotations:
+    # Prometheus metrics scraping configuration
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+    prometheus.io/path: "/actuator/prometheus"
+    # Azure Monitor integration
+    azure.monitor/enabled: "true"
+    # Ensure service is only accessible internally
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+    # Health check configuration
+    service.kubernetes.io/health-check-path: "/actuator/health/readiness"
+    # Load balancing configuration
+    service.kubernetes.io/load-balancer-connection-draining-enabled: "true"
+    service.kubernetes.io/load-balancer-connection-draining-timeout: "30"
+
+spec:
+  type: ClusterIP
+  ports:
+    # Main application port
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+    # Metrics port for monitoring
+    - name: metrics
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+  
+  # Pod selector for service endpoints
+  selector:
+    app: vcms
+    component: backend
+  
+  # Session handling configuration
+  sessionAffinity: None
+  
+  # Endpoint publishing configuration
+  publishNotReadyAddresses: false
