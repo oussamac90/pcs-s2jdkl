@@ -1,0 +1,103 @@
+# Test Environment Configuration for Vessel Call Management System
+# Spring Boot Version: 3.1.x
+# H2 Database Version: 2.1.x
+
+spring:
+  profiles: test
+
+  # Database Configuration - Using H2 in-memory database for tests
+  datasource:
+    url: jdbc:h2:mem:vcms_test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: ''
+    driver-class-name: org.h2.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      idle-timeout: 30000
+      connection-timeout: 10000
+      max-lifetime: 60000
+
+  # JPA Configuration optimized for testing
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+      format_sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        default_schema: public
+
+  # Redis Configuration for testing
+  redis:
+    host: localhost
+    port: 6370
+    database: 1
+    ssl: false
+    timeout: 1000
+
+  # RabbitMQ Configuration for testing
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    ssl:
+      enabled: false
+
+  # Security Configuration for testing
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9000
+          jwk-set-uri: http://localhost:9000/.well-known/jwks.json
+
+# Server Configuration
+server:
+  port: 0  # Random port for parallel test execution
+  error:
+    include-stacktrace: always
+    include-message: always
+
+# Management & Monitoring Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ['health', 'info']
+  endpoint:
+    health:
+      show-details: always
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.pcs.vcms: DEBUG
+    org.springframework: WARN
+    org.hibernate: WARN
+
+# Application Specific Test Configuration
+app:
+  async:
+    core-pool-size: 2
+    max-pool-size: 4
+    queue-capacity: 50
+  jwt:
+    expiration: 3600
+    refresh-token-expiration: 7200
+  cors:
+    allowed-origins: ['*']
+    allowed-methods: ['*']
+    allowed-headers: ['*']
+    max-age: 3600
+  websocket:
+    endpoint: /ws
+    allowed-origins: ['*']
+  cache:
+    ttl: 60
+    vessel-calls: 60
+    berth-allocations: 60
